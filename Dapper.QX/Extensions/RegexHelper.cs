@@ -6,6 +6,23 @@ namespace Dapper.QX.Extensions
 {
     public static class RegexHelper
     {
+        public static QueryParameters ParseParameters(string sql, bool cleaned = false)
+        {
+            var result = new QueryParameters();
+            result.Optional = ParseOptionalTokens(sql).ToArray();
+
+            string baseSql = RemoveOptionalTokens(sql);
+            result.Required = ParseParameterNames(baseSql, cleaned).ToArray();
+
+            // need to mark optional params as required if they appear as required
+            foreach (var o in result.Optional)
+            {
+                
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// Returns the defined parameter names within a SQL statement
         /// </summary>
@@ -18,7 +35,7 @@ namespace Dapper.QX.Extensions
             return matches.OfType<Match>().Select(m => (cleaned) ? m.Value.Substring(1) : m.Value);
         }
 
-        public static IEnumerable<OptionalToken> ParseOptionalTokens(string input)
+        public static IEnumerable<OptionalToken> ParseOptionalTokens(string input, bool cleaned = false)
         {
             // thanks to https://www.regextester.com/97707
             
@@ -30,7 +47,7 @@ namespace Dapper.QX.Extensions
                 Match = m,
                 Token = m.Value,
                 Content = m.Value.Substring(markerLength, m.Value.Length - (markerLength * 2)).Trim(),
-                ParameterName = ParseParameterNames(m.Value).FirstOrDefault()
+                ParameterNames = ParseParameterNames(m.Value, cleaned).ToArray()
             });
         }
 
@@ -43,11 +60,27 @@ namespace Dapper.QX.Extensions
         }
     }
 
+    public class QueryParameters
+    {
+        public string[] Required { get; set; }
+        public OptionalToken[] Optional { get; set; }        
+
+        public IEnumerable<string> AllParamNames()
+        {
+            return Required.Concat(Optional.SelectMany(o => o.ParameterNames)).Distinct();
+        }        
+    }
+
     public class OptionalToken
     {
         public Match Match { get; set; }
         public string Token { get; set; }
         public string Content { get; set; }
-        public string ParameterName { get; set; }
+        public string[] ParameterNames { get; set; }
+
+        /// <summary>
+        /// These parameters were
+        /// </summary>
+        public string[] Required { get; set; }
     }
 }
