@@ -22,7 +22,7 @@ namespace Dapper.QX
         private static IEnumerable<PropertyInfo> GetProperties(object query, string sql, out IEnumerable<string> builtInParams)
         {
             // this gets the param names within the query based on words with leading '@'
-            builtInParams = RegexHelper.GetParameterNames(sql, true).Select(p => p.ToLower());
+            builtInParams = RegexHelper.ParseParameterNames(sql, true).Select(p => p.ToLower());
             var builtInParamsArray = builtInParams.ToArray();
 
             // these are the properties of the Query that are explicitly defined and may impact the WHERE clause
