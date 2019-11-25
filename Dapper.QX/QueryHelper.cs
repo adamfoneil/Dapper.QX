@@ -48,7 +48,7 @@ namespace Dapper.QX
             result = ResolveOffset(result, parameters, queryTypeName);            
             result = RegexHelper.RemovePlaceholders(result);
 
-            return result;  
+            return result.Trim();  
         }
 
         private static string ResolveOffset(string sql, object parameters, string queryTypeName)
@@ -223,7 +223,7 @@ namespace Dapper.QX
                     PropertyInfo = pi
                 }).ToDictionary(row => row.Name, row => row.PropertyInfo);
 
-            return parameterNames.All(p => HasValue(paramPropertyMap[p.ToLower()], parameters));
+            return parameterNames.All(p => paramPropertyMap.ContainsKey(p.ToLower()) && HasValue(paramPropertyMap[p.ToLower()], parameters));
         }
 
         private static bool HasValue(PropertyInfo propertyInfo, object @object, out object value)
