@@ -43,3 +43,5 @@ using (var cn = GetConnection())
 }
 ```
 Because **maxDate** is not specified, the corresponding SQL surrounding it is omitted from the query.
+
+Make query classes testable with [ITestableQuery](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Interfaces/ITestableQuery.cs).
