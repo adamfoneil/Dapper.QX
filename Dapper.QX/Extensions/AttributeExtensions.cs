@@ -22,5 +22,11 @@ namespace Dapper.QX.Extensions
             attribute = null;
             return false;
         }
+
+        internal static T GetAttribute<T>(this MemberInfo memberInfo) where T : Attribute
+        {
+            if (HasAttribute(memberInfo, out T result)) return result;
+            return null;
+        }
     }
 }
