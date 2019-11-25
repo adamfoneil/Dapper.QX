@@ -84,7 +84,12 @@ namespace Dapper.QX.Extensions
         public string[] Required { get; set; }
         public OptionalToken[] Optional { get; set; }
 
-        internal bool IsRequired(PropertyInfo pi)
+        public bool IsOptional(PropertyInfo pi)
+        {
+            return !IsRequired(pi);
+        }
+
+        public bool IsRequired(PropertyInfo pi)
         {
             return Required.Select(p => p.ToLower()).Contains(pi.Name.ToLower());
         }

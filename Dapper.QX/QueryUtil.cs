@@ -82,7 +82,7 @@ namespace Dapper.QX
 
                 foreach (var pi in properties)
                 {
-                    if (HasValue(pi, parameters, out object value) && !paramInfo.IsRequired(pi))
+                    if (HasValue(pi, parameters, out object value) && paramInfo.IsOptional(pi))
                     {
                         if (GetCaseExpression(pi, value, out string caseExpression))
                         {
@@ -92,7 +92,7 @@ namespace Dapper.QX
                         {
                             terms.Add(whereExpression);
                         }
-                        else if (GetPhraseQuery(pi, out PhraseQuery phraseQuery))
+                        else if (GetPhraseQuery(pi, value, out PhraseQuery phraseQuery))
                         {
                             queryParams.AddDynamicParams(phraseQuery.Parameters);
                             terms.Add(phraseQuery.Expression);
@@ -112,6 +112,19 @@ namespace Dapper.QX
             }
 
             return result;
+        }
+
+        private static bool GetPhraseQuery(PropertyInfo pi, object value, out PhraseQuery phraseQuery)
+        {
+            PhraseAttribute phraseAttr = pi.GetAttribute<PhraseAttribute>();
+            if (phraseAttr != null)
+            {
+                phraseQuery = new PhraseQuery(pi.Name, value.ToString(), phraseAttr);
+                return true;
+            }
+
+            phraseQuery = null;
+            return false;
         }
 
         private static bool GetWhereExpression(PropertyInfo pi, out string whereExpression)
