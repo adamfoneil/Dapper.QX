@@ -8,13 +8,18 @@ using System.Reflection;
 
 namespace Dapper.QX
 {
-    public static class QueryUtil
+    public static class QueryHelper
     {
         public const string OrderByToken = "{orderBy}";
         public const string JoinToken = "{join}";
         public const string WhereToken = "{where}";
         public const string AndWhereToken = "{andWhere}";
         public const string OffsetToken = "{offset}";
+
+        public static string ResolveSql(string sql, object parameters)
+        {
+            return ResolveSql(sql, parameters, out _);
+        }
 
         public static string ResolveSql(string sql, object parameters, out DynamicParameters dynamicParams)
         {
@@ -36,10 +41,10 @@ namespace Dapper.QX
 
             string queryTypeName = parameters.GetType().Name;
 
-            result = ResolveOptionalCriteria(result, properties, parameters, paramInfo);
+            result = ResolveInlineOptionalCriteria(result, properties, parameters, paramInfo);
             result = ResolveOrderBy(result, parameters, queryTypeName);
             result = ResolveOptionalJoins(result, parameters);
-            result = InjectCriteria(result, paramInfo, properties, parameters, dynamicParams);
+            result = ResolveInjectedCriteria(result, paramInfo, properties, parameters, dynamicParams);
             result = ResolveOffset(result, parameters, queryTypeName);            
             result = RegexHelper.RemovePlaceholders(result);
 
@@ -72,7 +77,7 @@ namespace Dapper.QX
             return false;
         }
 
-        private static string InjectCriteria(string sql, QueryParameters paramInfo, IEnumerable<PropertyInfo> properties, object parameters, DynamicParameters queryParams)
+        private static string ResolveInjectedCriteria(string sql, QueryParameters paramInfo, IEnumerable<PropertyInfo> properties, object parameters, DynamicParameters queryParams)
         {
             string result = sql;            
 
@@ -187,12 +192,12 @@ namespace Dapper.QX
             return sql;
         }
 
-        private static string ResolveOptionalCriteria(string input, IEnumerable<PropertyInfo> properties, object parameters, QueryParameters paramInfo)
+        private static string ResolveInlineOptionalCriteria(string input, IEnumerable<PropertyInfo> properties, object parameters, QueryParameters paramInfo)
         {
             string result = input;
             foreach (var optional in paramInfo.Optional)
             {
-                if (AllParametersSet(properties, parameters, optional.ParameterNames))
+                if (AllParametersSet(parameters, optional.ParameterNames))
                 {
                     result = result.Replace(optional.Token, optional.Content);
                 }
@@ -205,11 +210,13 @@ namespace Dapper.QX
             return result;
         }
 
-        private static bool AllParametersSet(IEnumerable<PropertyInfo> properties, object parameters, string[] parameterNames)
-        {                        
+        private static bool AllParametersSet(object parameters, string[] parameterNames)
+        {
+            var properties = parameters.GetType().GetProperties();
+
             var paramPropertyMap = 
                 (from name in parameterNames
-                join pi in properties on name equals pi.Name
+                join pi in properties on name.ToLower() equals pi.Name.ToLower()
                 select new
                 {
                     Name = name.ToLower(),

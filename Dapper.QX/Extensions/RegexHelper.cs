@@ -11,7 +11,7 @@ namespace Dapper.QX.Extensions
         public static QueryParameters ParseParameters(string sql, bool cleaned = false)
         {
             var result = new QueryParameters();
-            result.Optional = ParseOptionalTokens(sql).ToArray();
+            result.Optional = ParseOptionalTokens(sql, cleaned).ToArray();
 
             string baseSql = RemoveOptionalTokens(sql);
             result.Required = ParseParameterNames(baseSql, cleaned).ToArray();
@@ -58,7 +58,7 @@ namespace Dapper.QX.Extensions
         {
             // thanks to https://www.regextester.com/97707
             
-            const string optionalRegex = @"\{{([^}}]+)\}}";
+            const string optionalRegex = @"\[{2}(.*)\]{2}";
             const int markerLength = 2; // length of "{{" and "}}"
 
             return Regex.Matches(input, optionalRegex).OfType<Match>().Select(m => new OptionalToken()
@@ -66,7 +66,7 @@ namespace Dapper.QX.Extensions
                 Match = m,
                 Token = m.Value,
                 Content = m.Value.Substring(markerLength, m.Value.Length - (markerLength * 2)).Trim(),
-                ParameterNames = ParseParameterNames(m.Value, cleaned).ToArray()
+                ParameterNames = ParseParameterNames(m.Value, cleaned).ToArray()                
             });
         }
 
@@ -106,6 +106,7 @@ namespace Dapper.QX.Extensions
         public string Token { get; set; }
         public string Content { get; set; }
         public string[] ParameterNames { get; set; }
+        public string[] CleanedParameterNames { get; set; }
 
         /// <summary>
         /// These parameters were

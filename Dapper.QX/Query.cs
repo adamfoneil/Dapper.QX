@@ -22,7 +22,7 @@ namespace Dapper.QX
         {
             try
             {
-                ResolvedSql = QueryUtil.ResolveSql(Sql, this, out DynamicParameters queryParams);
+                ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams);
                 return connection.Query(ResolvedSql, queryParams);
             }
             catch (Exception exc)
