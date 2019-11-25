@@ -1,4 +1,5 @@
 ﻿using Dapper.QX.Attributes;
+using Dapper.QX.Classes;
 using Dapper.QX.Extensions;
 using System;
 using System.Collections.Generic;
@@ -38,7 +39,7 @@ namespace Dapper.QX
             result = ResolveOptionalCriteria(result, properties, parameters, paramInfo);
             result = ResolveOrderBy(result, parameters, queryTypeName);
             result = ResolveOptionalJoins(result, parameters);
-            result = ResolveWhereClause(result, properties, parameters);
+            result = InjectCriteria(result, paramInfo, properties, parameters, dynamicParams);
             result = ResolveOffset(result, parameters, queryTypeName);            
             result = RegexHelper.RemovePlaceholders(result);
 
@@ -71,13 +72,43 @@ namespace Dapper.QX
             return false;
         }
 
-        private static string ResolveWhereClause(string sql, IEnumerable<PropertyInfo> properties, object parameters)
+        private static string InjectCriteria(string sql, QueryParameters paramInfo, IEnumerable<PropertyInfo> properties, object parameters, DynamicParameters queryParams)
         {
-            string result = sql;
+            string result = sql;            
 
             if (result.ContainsAnyOf(new string[] { WhereToken, AndWhereToken }, out string token))
             {
+                List<string> terms = new List<string>();
 
+                foreach (var pi in properties)
+                {
+                    if (HasValue(pi, parameters) && !paramInfo.IsRequired(pi))
+                    {
+                        if (GetCaseExpression(pi, out string caseExpression))
+                        {
+                            terms.Add(caseExpression);
+                        }
+                        else if (GetWhereExpression(pi, out string whereExpression))
+                        {
+                            terms.Add(whereExpression);
+                        }
+                        else if (GetPhraseQuery(pi, out PhraseQuery phraseQuery))
+                        {
+                            queryParams.AddDynamicParams(phraseQuery.Parameters);
+                            terms.Add(phraseQuery.Expression);
+                        }
+                    }
+                }
+
+                Dictionary<string, string> keywordOptions = new Dictionary<string, string>()
+                {
+                    { WhereToken, "WHERE" },
+                    { AndWhereToken, "AND" }
+                };
+
+                result = result.Replace(token, (terms.Any()) ?
+                    $"{keywordOptions[token]} {string.Join(" AND ", terms)}" : 
+                    string.Empty);
             }
 
             return result;

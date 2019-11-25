@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Dapper.QX.Extensions
@@ -81,7 +82,12 @@ namespace Dapper.QX.Extensions
     public class QueryParameters
     {
         public string[] Required { get; set; }
-        public OptionalToken[] Optional { get; set; }        
+        public OptionalToken[] Optional { get; set; }
+
+        internal bool IsRequired(PropertyInfo pi)
+        {
+            return Required.Select(p => p.ToLower()).Contains(pi.Name.ToLower());
+        }
 
         public IEnumerable<string> AllParamNames()
         {
