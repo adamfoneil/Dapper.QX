@@ -91,7 +91,6 @@ namespace Testing
                     [whatever]
                 WHERE
                     1 = 1")); // since end param is missing, the optional part is omitted
-
         }
     }
 }

@@ -45,13 +45,9 @@ namespace Dapper.QX.Extensions
         }
 
         public static IEnumerable<string> ParsePlaceholders(string input)
-        {            
-            var regexes = new string[] { @"\{([^}]+)\}", @"\%([^%]+)\%" };
-            foreach (var pattern in regexes)
-            {
-                var matches = Regex.Matches(input, pattern);
-                foreach (Match m in matches) yield return m.Value;
-            }
+        {                                    
+            var matches = Regex.Matches(input, @"\{([^}]+)\}");
+            foreach (Match m in matches) yield return m.Value;            
         }
 
         public static IEnumerable<OptionalToken> ParseOptionalTokens(string input, bool cleaned = false)
