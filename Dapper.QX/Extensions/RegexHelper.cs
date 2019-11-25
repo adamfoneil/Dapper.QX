@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -14,11 +15,18 @@ namespace Dapper.QX.Extensions
             string baseSql = RemoveOptionalTokens(sql);
             result.Required = ParseParameterNames(baseSql, cleaned).ToArray();
 
-            // need to mark optional params as required if they appear as required
-            foreach (var o in result.Optional)
-            {
-                
-            }
+            return result;
+        }
+
+        public static string RemovePlaceholders(string input)
+        {
+            string result = input;
+
+            var optional = ParseOptionalTokens(result);
+            foreach (var o in optional) result = result.Replace(o.Token, string.Empty);
+
+            var remaining = ParsePlaceholders(result);
+            foreach (var ph in remaining) result = result.Replace(ph, string.Empty);
 
             return result;
         }
@@ -33,6 +41,16 @@ namespace Dapper.QX.Extensions
             const string paramRegex = "@([a-zA-Z][a-zA-Z0-9_]*)";
             var matches = Regex.Matches(sql, paramRegex);
             return matches.OfType<Match>().Select(m => (cleaned) ? m.Value.Substring(1) : m.Value);
+        }
+
+        public static IEnumerable<string> ParsePlaceholders(string input)
+        {            
+            var regexes = new string[] { @"\{([^}]+)\}", @"\%([^%]+)\%" };
+            foreach (var pattern in regexes)
+            {
+                var matches = Regex.Matches(input, pattern);
+                foreach (Match m in matches) yield return m.Value;
+            }
         }
 
         public static IEnumerable<OptionalToken> ParseOptionalTokens(string input, bool cleaned = false)

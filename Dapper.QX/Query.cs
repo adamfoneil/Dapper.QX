@@ -6,7 +6,6 @@ namespace Dapper.QX
 {
     public class Query<TResult>
     {
-
         public Query(string sql)
         {
             Sql = sql;
