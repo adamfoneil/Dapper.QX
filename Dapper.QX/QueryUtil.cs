@@ -82,9 +82,9 @@ namespace Dapper.QX
 
                 foreach (var pi in properties)
                 {
-                    if (HasValue(pi, parameters) && !paramInfo.IsRequired(pi))
+                    if (HasValue(pi, parameters, out object value) && !paramInfo.IsRequired(pi))
                     {
-                        if (GetCaseExpression(pi, out string caseExpression))
+                        if (GetCaseExpression(pi, value, out string caseExpression))
                         {
                             terms.Add(caseExpression);
                         }
@@ -112,6 +112,33 @@ namespace Dapper.QX
             }
 
             return result;
+        }
+
+        private static bool GetWhereExpression(PropertyInfo pi, out string whereExpression)
+        {
+            WhereAttribute whereAttr = pi.GetAttribute<WhereAttribute>();
+            if (whereAttr != null)
+            {
+                whereExpression = whereAttr.Expression;
+                return true;
+            }
+
+            whereExpression = null;
+            return false;
+        }
+
+        private static bool GetCaseExpression(PropertyInfo pi, object value, out string caseExpression)
+        {
+            var cases = pi.GetCustomAttributes(typeof(CaseAttribute), false).OfType<CaseAttribute>();
+            var selectedCase = cases?.FirstOrDefault(c => c.Value.Equals(value));
+            if (selectedCase != null)
+            {
+                caseExpression = selectedCase.Expression;
+                return true;
+            }
+
+            caseExpression = null;
+            return false;
         }
 
         private static string ResolveOptionalJoins(string sql, object parameters)
