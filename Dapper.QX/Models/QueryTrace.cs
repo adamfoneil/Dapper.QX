@@ -6,13 +6,13 @@ namespace Dapper.QX.Models
     {
         public QueryTrace(string queryName, string sql, DynamicParameters parameters, TimeSpan duration)
         {
-            QueryName = queryName;            
+            QueryName = queryName;
             Sql = sql;
             Parameters = parameters;
             Duration = duration;
         }
 
-        public string QueryName { get; }        
+        public string QueryName { get; }
         public string Sql { get; }
         public DynamicParameters Parameters { get; }
         public TimeSpan Duration { get; }

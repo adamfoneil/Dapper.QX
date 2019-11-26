@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -45,15 +44,15 @@ namespace Dapper.QX.Extensions
         }
 
         public static IEnumerable<string> ParsePlaceholders(string input)
-        {                                    
+        {
             var matches = Regex.Matches(input, @"\{([^}]+)\}");
-            foreach (Match m in matches) yield return m.Value;            
+            foreach (Match m in matches) yield return m.Value;
         }
 
         public static IEnumerable<OptionalToken> ParseOptionalTokens(string input, bool cleaned = false)
         {
             // thanks to https://www.regextester.com/97707
-            
+
             const string optionalRegex = @"\[{2}(.*)\]{2}";
             const int markerLength = 2; // length of "{{" and "}}"
 
@@ -62,7 +61,7 @@ namespace Dapper.QX.Extensions
                 Match = m,
                 Token = m.Value,
                 Content = m.Value.Substring(markerLength, m.Value.Length - (markerLength * 2)).Trim(),
-                ParameterNames = ParseParameterNames(m.Value, cleaned).ToArray()                
+                ParameterNames = ParseParameterNames(m.Value, cleaned).ToArray()
             });
         }
 
@@ -93,7 +92,7 @@ namespace Dapper.QX.Extensions
         public IEnumerable<string> AllParamNames()
         {
             return Required.Concat(Optional.SelectMany(o => o.ParameterNames)).Distinct();
-        }        
+        }
     }
 
     public class OptionalToken

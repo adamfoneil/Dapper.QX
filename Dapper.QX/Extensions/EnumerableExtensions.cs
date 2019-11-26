@@ -8,6 +8,6 @@ namespace Dapper.QX.Extensions
         public static bool ContainsAny<T>(this IEnumerable<T> items, IEnumerable<T> searchFor)
         {
             return items.Any(item => searchFor.Contains(item));
-        }        
+        }
     }
 }

@@ -36,7 +36,7 @@ namespace Dapper.QX
 
             string result = sql;
 
-            var properties = GetParamProperties(parameters, sql, out QueryParameters paramInfo);            
+            var properties = GetParamProperties(parameters, sql, out QueryParameters paramInfo);
             dynamicParams = GetDynamicParameters(properties, parameters);
 
             string queryTypeName = parameters.GetType().Name;
@@ -45,10 +45,10 @@ namespace Dapper.QX
             result = ResolveOrderBy(result, parameters, queryTypeName);
             result = ResolveOptionalJoins(result, parameters);
             result = ResolveInjectedCriteria(result, paramInfo, properties, parameters, dynamicParams);
-            result = ResolveOffset(result, parameters, queryTypeName);            
+            result = ResolveOffset(result, parameters, queryTypeName);
             result = RegexHelper.RemovePlaceholders(result);
 
-            return result.Trim();  
+            return result.Trim();
         }
 
         private static string ResolveOffset(string sql, object parameters, string queryTypeName)
@@ -79,7 +79,7 @@ namespace Dapper.QX
 
         private static string ResolveInjectedCriteria(string sql, QueryParameters paramInfo, IEnumerable<PropertyInfo> properties, object parameters, DynamicParameters queryParams)
         {
-            string result = sql;            
+            string result = sql;
 
             if (result.ContainsAnyOf(new string[] { WhereToken, AndWhereToken }, out string token))
             {
@@ -112,7 +112,7 @@ namespace Dapper.QX
                 };
 
                 result = result.Replace(token, (terms.Any()) ?
-                    $"{keywordOptions[token]} {string.Join(" AND ", terms)}" : 
+                    $"{keywordOptions[token]} {string.Join(" AND ", terms)}" :
                     string.Empty);
             }
 
@@ -214,14 +214,14 @@ namespace Dapper.QX
         {
             var properties = parameters.GetType().GetProperties();
 
-            var paramPropertyMap = 
+            var paramPropertyMap =
                 (from name in parameterNames
-                join pi in properties on name.ToLower() equals pi.Name.ToLower()
-                select new
-                {
-                    Name = name.ToLower(),
-                    PropertyInfo = pi
-                }).ToDictionary(row => row.Name, row => row.PropertyInfo);
+                 join pi in properties on name.ToLower() equals pi.Name.ToLower()
+                 select new
+                 {
+                     Name = name.ToLower(),
+                     PropertyInfo = pi
+                 }).ToDictionary(row => row.Name, row => row.PropertyInfo);
 
             return parameterNames.All(p => paramPropertyMap.ContainsKey(p.ToLower()) && HasValue(paramPropertyMap[p.ToLower()], parameters));
         }
@@ -260,8 +260,8 @@ namespace Dapper.QX
         {
             // this gets the param names within the query based on words with leading '@'
             paramInfo = RegexHelper.ParseParameters(sql, cleaned: true);
-            
-            var allParams = paramInfo.AllParamNames().Select(p => p.ToLower()).ToArray();            
+
+            var allParams = paramInfo.AllParamNames().Select(p => p.ToLower()).ToArray();
 
             // these are the properties of the Query that are explicitly defined and may impact the WHERE clause
             var queryProps = parameters.GetType().GetProperties().Where(pi =>

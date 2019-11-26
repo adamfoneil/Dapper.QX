@@ -1,4 +1,4 @@
-﻿using Dapper.QX.Delegates;
+﻿using Dapper.QX.Classes;
 using Dapper.QX.Exceptions;
 using Dapper.QX.Models;
 using System;
@@ -34,28 +34,28 @@ namespace Dapper.QX
             return ResolvedSql;
         }
 
-        public async Task<IEnumerable<TResult>> ExecuteAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout =  null, CommandType? commandType = null)
+        public async Task<IEnumerable<TResult>> ExecuteAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
             var result = await ExecuteInnerAsync(
                 async (string sql, object param) =>
                 {
-                    return new DapperResult<TResult>() 
-                    { 
-                        Enumerable = await connection.QueryAsync<TResult>(sql, param, transaction, commandTimeout, commandType) 
+                    return new DapperResult<TResult>()
+                    {
+                        Enumerable = await connection.QueryAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
                     };
                 });
 
             return result.Enumerable;
-        }   
-        
+        }
+
         public async Task<TResult> ExecuteSingleAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
             var result = await ExecuteInnerAsync(
                 async (string sql, object param) =>
                 {
-                    return new DapperResult<TResult>() 
-                    { 
-                        Single = await connection.QuerySingleAsync<TResult>(sql, param, transaction, commandTimeout, commandType) 
+                    return new DapperResult<TResult>()
+                    {
+                        Single = await connection.QuerySingleAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
                     };
                 });
 
@@ -80,7 +80,7 @@ namespace Dapper.QX
         private async Task<DapperResult<T>> ExecuteInnerAsync<T>(Func<string, object, Task<DapperResult<T>>> dapperMethod)
         {
             ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams);
-            Parameters = queryParams;            
+            Parameters = queryParams;
 
             var stopwatch = Stopwatch.StartNew();
             try

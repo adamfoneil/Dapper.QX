@@ -21,7 +21,7 @@ namespace Dapper.QX
                 foreach (var testCase in qry.GetTestCases())
                 {
                     testCase.TestExecute(cn);
-                }                
+                }
             }
         }
     }
