@@ -1,0 +1,8 @@
+{
+  "ConnectionStrings": {
+    "SqlServerMaster": "Data Source=(localdb)\\MSSqlLocalDb;Database=master;Integrated Security=SSPI",
+    "SqlServer": "Data Source=(localdb)\\MSSqlLocalDb;Database=DapperQX;Integrated Security=SSPI",
+    "MySqlMaster": "Server=127.0.0.1; Port=3306; Uid=root; Pwd=Password12!; SSLMode=none",
+    "MySql": "Server=127.0.0.1; Port=3306; Database=Postulate; Uid=root; Pwd=Password12!; SSLMode=none"
+  }
+}
