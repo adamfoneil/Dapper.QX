@@ -68,7 +68,7 @@ public class MyQuery : Query<MyResultClass>, ITestableQuery
     yield return new MyQuery() { AssignedTo = "anyone" };
   }
   
-  // implement TestExecute with the same implementation always
+  // implement TestExecute the same way always
   public IEnumerable<dynamic> TestExecute(IDbConnection connection)
   {
     return TestExecuteHelper(connection);
