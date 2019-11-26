@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Dapper.QX
 {
-    public static class QueryHelper
+    public static partial class QueryHelper
     {
         public const string OrderByToken = "{orderBy}";
         public const string JoinToken = "{join}";
