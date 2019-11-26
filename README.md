@@ -33,7 +33,7 @@ using (var cn = GetConnection())
 ```
 Use **{where}** or **{andWhere}** tokens to indicate where dynamic criteria is inserted. Mix and match [Where](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Attributes/Where.cs) and [Case](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Attributes/Case.cs) attributes on query class properties to control what criteria is injected. Learn about more attributes Dapper.QX offers.
 
-To help you build C# result classes for any SQL query, I offer a free tool [Postulate.Ziner](https://github.com/adamosoftware/Postulate.Zinger).
+To help you build C# result classes for any SQL query, I offer a free tool [Postulate.Zinger](https://github.com/adamosoftware/Postulate.Zinger).
 
 You can also use the [ResolveQueryAsync](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/QueryHelper_ext.cs#L9) method to execute inline SQL with dynamic optional parts marked by double square brackets:
 
