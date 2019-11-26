@@ -81,30 +81,23 @@ namespace Dapper.QX
         {
             ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams);
             Parameters = queryParams;
-
-            var stopwatch = Stopwatch.StartNew();
+                        
             try
             {
-                return await dapperMethod.Invoke(ResolvedSql, queryParams);
+                var stopwatch = Stopwatch.StartNew();
+                var result = await dapperMethod.Invoke(ResolvedSql, queryParams);
+                stopwatch.Stop();
+
+                var qt = new QueryTrace(GetType().Name, ResolvedSql, queryParams, stopwatch.Elapsed);
+                OnQueryExecuted(qt);
+                await OnQueryExecutedAsync(qt);
+
+                return result;
             }
             catch (Exception exc)
-            {
+            {                
                 throw new QueryException(exc, ResolvedSql, queryParams);
-            }
-            finally
-            {
-                try
-                {
-                    stopwatch.Stop();
-                    var qt = new QueryTrace(GetType().Name, ResolvedSql, queryParams, stopwatch.Elapsed);
-                    OnQueryExecuted(qt);
-                    await OnQueryExecutedAsync(qt);
-                }
-                catch 
-                {
-                    // ignore exceptions here so they don't get in the way of a QueryException
-                }
-            }
+            }            
         }
 
         /// <summary>
