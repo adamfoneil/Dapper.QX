@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
+using System.IO;
+using System.Reflection;
 
 namespace Testing
 {
@@ -7,11 +9,11 @@ namespace Testing
     /// </summary>
     internal static class ConfigHelper
     {
-        public static IConfigurationRoot GetIConfigurationRoot(string outputPath)
+        public static IConfigurationRoot GetIConfigurationRoot(string fileName)
         {
             return new ConfigurationBuilder()
-                .SetBasePath(outputPath)
-                .AddJsonFile("settings.json", optional: true)                                
+                .SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
+                .AddJsonFile(fileName)                                
                 .Build();
         }
     }
