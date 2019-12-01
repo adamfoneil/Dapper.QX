@@ -1,11 +1,13 @@
-﻿using System;
-using System.Data;
-using System.Data.SqlClient;
-using AdamOneilSoftware;
+﻿using AdamOneilSoftware;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SqlIntegration.Library;
+using SqlIntegration.Library.Classes;
+using SqlIntegration.Library.Extensions;
 using SqlServer.LocalDb;
 using SqlServer.LocalDb.Models;
+using System;
+using System.Data;
+using System.Data.SqlClient;
 using Testing.Queries;
 
 namespace Testing
@@ -14,7 +16,7 @@ namespace Testing
     public class ExecutionSqlServer : ExecutionBase
     {
         [TestMethod]
-        public void YimbaQueries()
+        public void SampleTableQueries()
         {
             using (var cn = LocalDb.GetConnection("DapperQX", CreateSampleSchema))
             {
@@ -34,7 +36,8 @@ namespace Testing
                         [Id] int identity(1,1) PRIMARY KEY
                     )")
             };
-
+            LocalDb.ExecuteInitializeStatements(connection, statements);
+            
             var tdg = new TestDataGenerator();
             tdg.Generate<SampleTableResult>(1000, (result) =>
             {
@@ -43,7 +46,11 @@ namespace Testing
                 result.Weight = tdg.RandomInRange<decimal>(50, 150, (d) => d);
             }, (results) =>
             {
-                
+                var dataTable = results.ToDataTable();
+                BulkInsert.ExecuteAsync(dataTable, connection, DbObject.Parse("dbo.SampleTable"), 50, new BulkInsertOptions()
+                {
+                    SkipIdentityColumn = "Id"
+                }).Wait();
             });
         }
 
