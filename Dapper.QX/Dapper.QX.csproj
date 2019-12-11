@@ -8,12 +8,20 @@
     <Product>Dapper.QX</Product>
     <Description>More powerful and testable inline SQL used with Dapper</Description>
     <Copyright>Copyright (c) Adam O'Neil 2019</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/adamosoftware/Dapper.QX</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/adamosoftware/Dapper.QX</RepositoryUrl>
+    <PackageTags>dapper inline-sql</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Delegates\**" />
     <EmbeddedResource Remove="Delegates\**" />
     <None Remove="Delegates\**" />
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
