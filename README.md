@@ -1,4 +1,4 @@
-**Dapper.QX** makes inline SQL more powerful and testable via the [Query](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Query_base.cs) class. Get the convenience, safety and capability of [Dapper](https://github.com/StackExchange/Dapper) with dynamic criteria, tracing, and full text queries.
+Nuget package **Dapper.QX** makes inline SQL more powerful and testable via the [Query](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Query_base.cs) class. Get the convenience, safety and capability of [Dapper](https://github.com/StackExchange/Dapper) with dynamic criteria, tracing, and full text queries.
 
 ```
 public class MyQuery : Query<MyResultClass>
