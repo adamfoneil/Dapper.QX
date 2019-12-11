@@ -11,7 +11,7 @@ namespace Testing
         {
             var query = new Yimba();
             var sql = QueryHelper.ResolveSql(query.Sql, query);
-            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [Occident] FROM [Yimba]"));
+            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Id] FROM [SampleTable]"));            
         }
 
         [TestMethod]
@@ -19,7 +19,7 @@ namespace Testing
         {
             var query = new Yimba() { FirstNameLike = "arxo" };
             var sql = QueryHelper.ResolveSql(query.Sql, query);
-            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [Occident] FROM [Yimba] WHERE [FirstName] LIKE '%'+@firstNameLike+'%'"));
+            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Id] FROM [SampleTable] WHERE [FirstName] LIKE '%'+@firstNameLike+'%'"));
         }
     }
 }

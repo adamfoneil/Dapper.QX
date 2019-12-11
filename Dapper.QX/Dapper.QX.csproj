@@ -5,11 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.0.30" />
+    <Compile Remove="Delegates\**" />
+    <EmbeddedResource Remove="Delegates\**" />
+    <None Remove="Delegates\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Delegates\" />
+    <PackageReference Include="Dapper" Version="2.0.30" />
   </ItemGroup>
 
 </Project>
