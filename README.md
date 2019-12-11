@@ -1,13 +1,13 @@
-**Dapper.QX** makes inline SQL more powerful and testable via the [Query](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Query_base.cs) class. Get the convenience, safety and capability of [Dapper](https://github.com/StackExchange/Dapper) with dynamic criteria, tracing, and full text queries.
+**Dapper.QX** makes inline SQL more capable and testable via the [Query](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Query_base.cs) class. Get the convenience, safety and capability of [Dapper](https://github.com/StackExchange/Dapper) with dynamic criteria, tracing, and full text queries.
 
 ```
 public class MyQuery : Query<MyResultClass>
 {
-  public MyQuery() : base(
-    @"SELECT * 
-    FROM [whatever]
-    {where}
-    ORDER BY [something]")
+    public MyQuery() : base(
+        @"SELECT * 
+        FROM [whatever]
+        {where}
+        ORDER BY [something]")
     
     [Where("[SomeDate]>=@minDate")]
     public DateTime? MinDate { get; set; }
@@ -20,7 +20,9 @@ public class MyQuery : Query<MyResultClass>
     [Where("[AssignedTo]=@assignedTo")]
     public string AssignedTo { get; set; }
 }
-
+```
+Run your query like this:
+```
 using (var cn = GetConnection())
 {
   var data = await new MyQuery() 
