@@ -8,6 +8,7 @@ using SqlServer.LocalDb.Models;
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 using Testing.Queries;
 
 namespace Testing
@@ -15,16 +16,8 @@ namespace Testing
     [TestClass]
     public class ExecutionSqlServer : ExecutionBase
     {
-        [TestMethod]
-        public void SampleTableQueries()
-        {
-            using (var cn = LocalDb.GetConnection("DapperQX", CreateSampleSchema))
-            {
-
-            }
-        }
-
-        private void CreateSampleSchema(SqlConnection connection)
+        [TestInitialize]
+        public async Task CreateSampleSchemaAsync()
         {
             var statements = new InitializeStatement[]
             {
@@ -36,28 +29,40 @@ namespace Testing
                         [Id] int identity(1,1) PRIMARY KEY
                     )")
             };
-            LocalDb.ExecuteInitializeStatements(connection, statements);
-            
-            var tdg = new TestDataGenerator();
-            tdg.Generate<SampleTableResult>(1000, (result) =>
+
+            using (var cn = GetConnection())
             {
-                result.FirstName = tdg.Random(Source.FirstName);
-                result.SomeDate = tdg.RandomInRange(-1000, 1000, (i) => DateTime.Today.AddDays(i));
-                result.Weight = tdg.RandomInRange<decimal>(50, 150, (d) => d);
-            }, (results) =>
-            {
-                var dataTable = results.ToDataTable();
-                BulkInsert.ExecuteAsync(dataTable, connection, DbObject.Parse("dbo.SampleTable"), 50, new BulkInsertOptions()
+                LocalDb.ExecuteInitializeStatements(cn as SqlConnection, statements);
+
+                var tdg = new TestDataGenerator();
+                tdg.Generate<SampleTableResult>(1000, (result) =>
                 {
-                    SkipIdentityColumn = "Id"
-                }).Wait();
-            });
+                    result.FirstName = tdg.Random(Source.FirstName);
+                    result.SomeDate = tdg.RandomInRange(-1000, 1000, (i) => DateTime.Today.AddDays(i));
+                    result.Weight = tdg.RandomInRange<decimal>(50, 150, (d) => d);
+                }, async (results) =>
+                {
+                    var dataTable = results.ToDataTable();
+                    await BulkInsert.ExecuteAsync(dataTable, cn as SqlConnection, DbObject.Parse("dbo.SampleTable"), 50, new BulkInsertOptions()
+                    {
+                        SkipIdentityColumn = "Id"
+                    });
+                });
+            }
+        }
+
+        [TestMethod]
+        public void SampleTableQueries()
+        {
+            using (var cn = GetConnection())
+            {
+
+            }
         }
 
         protected override IDbConnection GetConnection()
         {
-            //string connectionString = GetConnectionString("SqlServer")
-            throw new NotImplementedException();
+            return LocalDb.GetConnection("DapperQX");
         }
     }
 }
