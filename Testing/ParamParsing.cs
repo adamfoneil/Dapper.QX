@@ -24,8 +24,8 @@ namespace Testing
                 FROM [whatever]
                 WHERE 
                     [wonga]=@whatever 
-                    {{ AND [plingus]=@thangly }}
-                    {{ AND [thardimus]=@yarbinshaw }}
+                    [[ AND [plingus]=@thangly ]]
+                    [[ AND [thardimus]=@yarbinshaw ]]
                 ORDER BY [crimson]";
 
             var tokens = RegexHelper.ParseOptionalTokens(sql);
@@ -49,8 +49,8 @@ namespace Testing
                 WHERE 
                     [helem]=@klaksod AND
                     [wilvip]=@horgunz
-                    {{ AND [rembenslom]=@hoopsenfargle }}
-                    {{ AND ([enzelfrage]=@zahbenlious OR [yexelhor]=@craybentanz) }}";
+                    [[ AND [rembenslom]=@hoopsenfargle ]]
+                    [[ AND ([enzelfrage]=@zahbenlious OR [yexelhor]=@craybentanz) ]]";
 
             var paramInfo = RegexHelper.ParseParameters(sql);
 
