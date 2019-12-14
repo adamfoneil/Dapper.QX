@@ -34,7 +34,7 @@ namespace Dapper.QX
             return ResolvedSql;
         }
 
-        public async Task<IEnumerable<TResult>> ExecuteAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
+        public async Task<IEnumerable<TResult>> ExecuteAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null)
         {
             var result = await ExecuteInnerAsync(
                 async (string sql, object param) =>
@@ -43,12 +43,12 @@ namespace Dapper.QX
                     {
                         Enumerable = await connection.QueryAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
                     };
-                });
+                }, traces);
 
             return result.Enumerable;
         }
 
-        public async Task<TResult> ExecuteSingleAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
+        public async Task<TResult> ExecuteSingleAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null)
         {
             var result = await ExecuteInnerAsync(
                 async (string sql, object param) =>
@@ -57,12 +57,12 @@ namespace Dapper.QX
                     {
                         Single = await connection.QuerySingleAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
                     };
-                });
+                }, traces);
 
             return result.Single;
         }
 
-        public async Task<TResult> ExecuteSingleOrDefaultAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
+        public async Task<TResult> ExecuteSingleOrDefaultAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null)
         {
             var result = await ExecuteInnerAsync(
                 async (string sql, object param) =>
@@ -71,13 +71,13 @@ namespace Dapper.QX
                     {
                         Single = await connection.QuerySingleOrDefaultAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
                     };
-                });
-
+                }, traces);
+            
             return result.Single;
 
         }
 
-        private async Task<DapperResult<T>> ExecuteInnerAsync<T>(Func<string, object, Task<DapperResult<T>>> dapperMethod)
+        private async Task<DapperResult<T>> ExecuteInnerAsync<T>(Func<string, object, Task<DapperResult<T>>> dapperMethod, List<QueryTrace> traces = null)
         {
             ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams);
             Parameters = queryParams;
@@ -91,6 +91,7 @@ namespace Dapper.QX
                 var qt = new QueryTrace(GetType().Name, ResolvedSql, queryParams, stopwatch.Elapsed);
                 OnQueryExecuted(qt);
                 await OnQueryExecutedAsync(qt);
+                traces?.Add(qt);
 
                 return result;
             }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Dapper.QX.Models;
+using System.Collections.Generic;
 
 namespace Dapper.QX.Classes
 {
@@ -10,7 +11,7 @@ namespace Dapper.QX.Classes
     internal class DapperResult<T>
     {
         public T Single { get; set; }
-        public IEnumerable<T> Enumerable { get; set; }
+        public IEnumerable<T> Enumerable { get; set; }        
     }
 
 }
