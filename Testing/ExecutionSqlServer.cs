@@ -8,6 +8,7 @@ using SqlServer.LocalDb;
 using SqlServer.LocalDb.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Testing
             LocalDb.TryDropDatabase(dbName, out _);
 
             using (var cn = LocalDb.GetConnection(dbName, SampleObjects()))
-            {
+            {                
                 var tdg = new TestDataGenerator();
                 tdg.Generate<TypicalQueryResult>(1000, (result) =>
                 {
@@ -36,6 +37,9 @@ namespace Testing
                     result.Notes = RandomPhrase(4, 8);
                 }, async (results) =>
                 {
+                    // AppVeyor seems to need this
+                    if (cn.State == ConnectionState.Closed) cn.Open();
+
                     var dataTable = results.ToDataTable();
                     await BulkInsert.ExecuteAsync(dataTable, cn as SqlConnection, DbObject.Parse("dbo.SampleTable"), 50, new BulkInsertOptions()
                     {
