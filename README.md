@@ -63,7 +63,7 @@ public class MyQuery : Query<MyResultClass>, ITestableQuery
   }
 }
 ```
-Now, in your unit test project, use the [QueryHelper.Test](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/QueryHelper_ext.cs#L16) method for each of your queries.
+Now, in your unit test project, use the [QueryHelper.Test](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/QueryHelper_ext.cs#L16) method for each of your queries. A good way to test queries on a SQL Server localdb instance is to use my [SqlServer.LocalDb.Testing](https://github.com/adamosoftware/SqlServer.LocalDb) package. You can see how it's used in Dapper.QX's own [tests](https://github.com/adamosoftware/Dapper.QX/blob/master/Testing/ExecutionSqlServer.cs#L89)
 ```
 [TestClass]
 public class QueryTests
