@@ -80,3 +80,4 @@ public class QueryTests
   }
 }
 ```
+Please see also my Crud library [Dapper.CX](https://github.com/adamosoftware/Dapper.CX), Dapper.QX's companion library.
