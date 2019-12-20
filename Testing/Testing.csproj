@@ -16,7 +16,7 @@
     <PackageReference Include="MSTest.TestFramework" Version="1.4.0" />
     <PackageReference Include="coverlet.collector" Version="1.0.1" />
     <PackageReference Include="SqlIntegration.Library" Version="0.2.4-alpha" />
-    <PackageReference Include="SqlServer.LocalDb.Testing" Version="1.0.8" />
+    <PackageReference Include="SqlServer.LocalDb.Testing" Version="1.0.9" />
   </ItemGroup>
 
   <ItemGroup>

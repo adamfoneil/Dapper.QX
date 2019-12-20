@@ -7,17 +7,18 @@ using System.Data;
 
 namespace Testing.Queries
 {
-    public class SampleTableResult
+    public class TypicalQueryResult
     {
         public string FirstName { get; set; }
         public decimal Weight { get; set; }
         public DateTime SomeDate { get; set; }
+        public string Notes { get; set; }
         public int Id { get; set; }
     }
 
-    public class Yimba : Query<SampleTableResult>, ITestableQuery
+    public class TypicalQuery : Query<TypicalQueryResult>, ITestableQuery
     {
-        public Yimba() : base("SELECT [FirstName], [Weight], [SomeDate], [Id] FROM [SampleTable] {where}")
+        public TypicalQuery() : base("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] {where} ORDER BY [FirstName] {offset}")
         {
         }
 
@@ -36,13 +37,21 @@ namespace Testing.Queries
         [Where("[SomeDate]<=@maxDate")]
         public DateTime? MaxDate { get; set; }
 
+        [Phrase(new string[] { nameof(TypicalQueryResult.Notes) })]
+        public string NotesContain { get; set; }
+
+        [Offset(20)]
+        public int? PageNumber { get; set; }
+
         public IEnumerable<ITestableQuery> GetTestCases()
         {
-            yield return new Yimba() { MinWeight = 10 };
-            yield return new Yimba() { MaxWeight = 100 };
-            yield return new Yimba() { FirstNameLike = "jambo" };
-            yield return new Yimba() { MinDate = new DateTime(2012, 1, 1) };
-            yield return new Yimba() { MaxDate = new DateTime(2019, 1, 1) };
+            yield return new TypicalQuery() { MinWeight = 10 };
+            yield return new TypicalQuery() { MaxWeight = 100 };
+            yield return new TypicalQuery() { FirstNameLike = "jambo" };
+            yield return new TypicalQuery() { MinDate = new DateTime(2012, 1, 1) };
+            yield return new TypicalQuery() { MaxDate = new DateTime(2019, 1, 1) };
+            yield return new TypicalQuery() { NotesContain = "this that -whatever" };
+            yield return new TypicalQuery() { PageNumber = 3 };
         }
 
         public IEnumerable<dynamic> TestExecute(IDbConnection connection)

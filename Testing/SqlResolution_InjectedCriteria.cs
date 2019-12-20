@@ -9,17 +9,17 @@ namespace Testing
         [TestMethod]
         public void QueryInjectCriteriaNone()
         {
-            var query = new Yimba();
+            var query = new TypicalQuery();
             var sql = QueryHelper.ResolveSql(query.Sql, query);
-            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Id] FROM [SampleTable]"));            
+            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable]  ORDER BY [FirstName]"));
         }
 
         [TestMethod]
         public void QueryInjectCriteria()
         {
-            var query = new Yimba() { FirstNameLike = "arxo" };
+            var query = new TypicalQuery() { FirstNameLike = "arxo" };
             var sql = QueryHelper.ResolveSql(query.Sql, query);
-            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Id] FROM [SampleTable] WHERE [FirstName] LIKE '%'+@firstNameLike+'%'"));
+            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [FirstName] LIKE '%'+@firstNameLike+'%' ORDER BY [FirstName]"));
         }
     }
 }
