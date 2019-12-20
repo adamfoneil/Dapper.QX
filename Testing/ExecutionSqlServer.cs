@@ -35,16 +35,16 @@ namespace Testing
                     result.SomeDate = tdg.RandomInRange(-1000, 1000, (i) => DateTime.Today.AddDays(i));
                     result.Weight = tdg.RandomInRange<decimal>(50, 150, (d) => d);
                     result.Notes = RandomPhrase(4, 8);
-                }, async (results) =>
+                }, (results) =>
                 {
                     // AppVeyor seems to need this
                     if (cn.State == ConnectionState.Closed) cn.Open();
 
                     var dataTable = results.ToDataTable();
-                    await BulkInsert.ExecuteAsync(dataTable, cn as SqlConnection, DbObject.Parse("dbo.SampleTable"), 50, new BulkInsertOptions()
+                    BulkInsert.ExecuteAsync(dataTable, cn as SqlConnection, DbObject.Parse("dbo.SampleTable"), 50, new BulkInsertOptions()
                     {
                         SkipIdentityColumn = "Id"
-                    });
+                    }).Wait();
                 });
             }
         }
