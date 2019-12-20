@@ -2,7 +2,7 @@
 
 Nuget package **Dapper.QX** makes inline SQL more powerful and testable via the [Query\<TResult\>](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Query_base.cs) class. Get the convenience, safety and capability of [Dapper](https://github.com/StackExchange/Dapper) with dynamic criteria, tracing, and full text queries.
 
-```
+```csharp
 public class MyQuery : Query<MyResultClass>
 {
     public MyQuery() : base(
@@ -24,7 +24,7 @@ public class MyQuery : Query<MyResultClass>
 }
 ```
 Run your query like this:
-```
+```csharp
 using (var cn = GetConnection())
 {
   var data = await new MyQuery() 
@@ -41,7 +41,7 @@ To help you build C# result classes for any SQL query, I offer a free tool [Post
 
 ## Testing
 Make query classes testable with the [ITestableQuery](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Interfaces/ITestableQuery.cs) interface. This approach catches invalid SQL, but does not assert any particular query results.
-```
+```csharp
 public class MyQuery : Query<MyResultClass>, ITestableQuery
 {
   // same code above omitted
@@ -63,8 +63,8 @@ public class MyQuery : Query<MyResultClass>, ITestableQuery
   }
 }
 ```
-Now, in your unit test project, use the [QueryHelper.Test](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/QueryHelper_ext.cs#L16) method for each of your queries. A good way to test queries on a SQL Server localdb instance is to use my [SqlServer.LocalDb.Testing](https://github.com/adamosoftware/SqlServer.LocalDb) package. You can see how it's used in Dapper.QX's own [tests](https://github.com/adamosoftware/Dapper.QX/blob/master/Testing/ExecutionSqlServer.cs#L89)
-```
+Now, in your unit test project, use the [QueryHelper.Test](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/QueryHelper_ext.cs#L16) method for each of your queries. A good way to test queries on a SQL Server localdb instance is to use my [SqlServer.LocalDb.Testing](https://github.com/adamosoftware/SqlServer.LocalDb) package. You can see how it's used in Dapper.QX's own [tests](https://github.com/adamosoftware/Dapper.QX/blob/master/Testing/ExecutionSqlServer.cs#L89).
+```csharp
 [TestClass]
 public class QueryTests
 {
