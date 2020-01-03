@@ -27,12 +27,12 @@ Run your query like this:
 ```csharp
 using (var cn = GetConnection())
 {
-  var data = await new MyQuery() 
-  {
-    MinDate = DateTime.Now, 
-    MaxDate = DateTime.Now.AddDays(30),
-    AssignedTo = "somebody"
-  }.ExecuteAsync(cn);
+    var data = await new MyQuery() 
+    {
+        MinDate = DateTime.Now, 
+        MaxDate = DateTime.Now.AddDays(30),
+        AssignedTo = "somebody"
+    }.ExecuteAsync(cn);
 }
 ```
 Use **{where}** or **{andWhere}** tokens to indicate where dynamic criteria is inserted. Mix and match [Where](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Attributes/Where.cs) and [Case](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Attributes/Case.cs) attributes on query class properties to control what criteria is injected. [Learn about](https://github.com/adamosoftware/Dapper.QX/wiki/Reference) more attributes Dapper.QX offers.
