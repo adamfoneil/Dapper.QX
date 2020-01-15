@@ -1,4 +1,5 @@
 ﻿using AdamOneilSoftware;
+using Dapper;
 using Dapper.QX;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SqlIntegration.Library;
@@ -111,6 +112,51 @@ namespace Testing
                 Debug.Print(qry.ResolvedSql); // for my own curiosity when running locally
                 Assert.IsTrue(results.Any());
             }
+        }
+
+        [TestMethod]
+        public void ParamDeclarations()
+        {
+            var qry = new TypicalQuery()
+            {
+                MinWeight = 12,
+                MaxWeight = 36,
+                FirstNameLike = "yohoo",
+                MinDate = new DateTime(2020, 1, 15)
+            };
+
+            QueryHelper.ResolveSql(qry.Sql, qry, out DynamicParameters queryParms);
+            var syntax = QueryHelper.ResolveParams(qry, queryParms);
+
+            Assert.IsTrue(syntax.ReplaceWhitespace().Equals(
+                @"DECLARE @MinWeight decimal, @MaxWeight decimal, @FirstNameLike nvarchar(max), @MinDate datetime;
+                SET @MinWeight = 12;
+                SET @MaxWeight = 36;
+                SET @FirstNameLike = 'yohoo';
+                SET @MinDate = '1/15/2020 12:00:00 AM';".ReplaceWhitespace()));
+        }
+
+        [TestMethod]
+        public void DebugSql()
+        {
+            var qry = new TypicalQuery()
+            {
+                MinWeight = 9,
+                MaxWeight = 56,
+                FirstNameLike = "warbler",
+                MinDate = new DateTime(2020, 1, 15)
+            };
+
+            qry.ResolveSql();
+            string debug = qry.DebugSql;
+            Assert.IsTrue(debug.ReplaceWhitespace().Equals(
+                @"DECLARE @MinWeight decimal, @MaxWeight decimal, @FirstNameLike nvarchar(max), @MinDate datetime;
+                SET @MinWeight = 9;
+                SET @MaxWeight = 56;
+                SET @FirstNameLike = 'warbler';
+                SET @MinDate = '1/15/2020 12:00:00 AM';
+
+                SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [Weight]>=@minWeight AND [Weight]<=@maxWeight AND [FirstName] LIKE '%'+@firstNameLike+'%' AND [SomeDate]>=@minDate ORDER BY [FirstName]".ReplaceWhitespace()));      
         }
     }
 }

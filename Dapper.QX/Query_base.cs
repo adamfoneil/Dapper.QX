@@ -18,11 +18,13 @@ namespace Dapper.QX
 
         public string Sql { get; }
         public string ResolvedSql { get; private set; }
+        public string DebugSql { get; private set; }
         public DynamicParameters Parameters { get; private set; }
 
         public string ResolveSql()
         {
             ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams);
+            DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + ResolvedSql;
             Parameters = queryParams;
             return ResolvedSql;
         }
@@ -80,6 +82,7 @@ namespace Dapper.QX
         private async Task<DapperResult<T>> ExecuteInnerAsync<T>(Func<string, object, Task<DapperResult<T>>> dapperMethod, List<QueryTrace> traces = null)
         {
             ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams);
+            DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + ResolvedSql;
             Parameters = queryParams;
                         
             try
