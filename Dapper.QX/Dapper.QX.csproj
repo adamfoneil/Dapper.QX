@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>Adam O'Neil</Authors>
     <Product>Dapper.QX</Product>
     <Description>More powerful and testable inline SQL used with Dapper</Description>
@@ -12,6 +12,7 @@
     <PackageProjectUrl>https://github.com/adamosoftware/Dapper.QX</PackageProjectUrl>
     <RepositoryUrl>https://github.com/adamosoftware/Dapper.QX</RepositoryUrl>
     <PackageTags>dapper inline-sql</PackageTags>
+    <PackageReleaseNotes>Added QueryHelper.ResolveParams() method and Query.DebugSql property</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
