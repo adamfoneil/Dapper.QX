@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 
 namespace Dapper.QX.Extensions
@@ -12,10 +13,10 @@ namespace Dapper.QX.Extensions
 
         internal static bool HasAttribute<T>(this MemberInfo memberInfo, out T attribute) where T : Attribute
         {
-            var attr = memberInfo.GetCustomAttribute(typeof(T));
-            if (attr != null)
+            var attrs = memberInfo.GetCustomAttributes(typeof(T), true).OfType<T>();
+            if (attrs?.Any() ?? false)
             {
-                attribute = attr as T;
+                attribute = attrs.First();
                 return true;
             }
 
