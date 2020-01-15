@@ -93,7 +93,7 @@ namespace Testing
         }       
         
         [TestMethod]
-        public void OffsetQuery()
+        public void OffsetQueryAsync()
         {
             using (var cn = LocalDb.GetConnection(dbName))
             {
@@ -103,12 +103,34 @@ namespace Testing
         }
 
         [TestMethod]
-        public void PhraseQuery()
+        public void OffsetQuery()
+        {
+            using (var cn = LocalDb.GetConnection(dbName))
+            {
+                var results = new TypicalQuery() { PageNumber = 4 }.Execute(cn);
+                Assert.IsTrue(results.Count() == 20);
+            }
+        }
+
+        [TestMethod]
+        public void PhraseQueryAsync()
         {
             using (var cn = LocalDb.GetConnection(dbName))
             {
                 var qry = new TypicalQuery() { NotesContain = "this whatever" };
                 var results = qry.ExecuteAsync(cn).Result;
+                Debug.Print(qry.ResolvedSql); // for my own curiosity when running locally
+                Assert.IsTrue(results.Any());
+            }
+        }
+
+        [TestMethod]
+        public void PhraseQuery()
+        {
+            using (var cn = LocalDb.GetConnection(dbName))
+            {
+                var qry = new TypicalQuery() { NotesContain = "this whatever" };
+                var results = qry.Execute(cn);
                 Debug.Print(qry.ResolvedSql); // for my own curiosity when running locally
                 Assert.IsTrue(results.Any());
             }

@@ -76,7 +76,6 @@ namespace Dapper.QX
                 }, traces);
             
             return result.Single;
-
         }
 
         private async Task<DapperResult<T>> ExecuteInnerAsync<T>(Func<string, object, Task<DapperResult<T>>> dapperMethod, List<QueryTrace> traces = null)
