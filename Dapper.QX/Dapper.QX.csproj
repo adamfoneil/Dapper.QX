@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <Authors>Adam O'Neil</Authors>
     <Product>Dapper.QX</Product>
     <Description>More powerful and testable inline SQL used with Dapper</Description>
@@ -12,7 +12,7 @@
     <PackageProjectUrl>https://github.com/adamosoftware/Dapper.QX</PackageProjectUrl>
     <RepositoryUrl>https://github.com/adamosoftware/Dapper.QX</RepositoryUrl>
     <PackageTags>dapper inline-sql</PackageTags>
-    <PackageReleaseNotes>Fixed issue with how custom attributes are inspected</PackageReleaseNotes>
+    <PackageReleaseNotes>More graceful behavior for unsupported parameter types in SQL syntax resolution</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

@@ -30,9 +30,9 @@ namespace Dapper.QX
                 {
                     return sqlTypes[type];
                 }
-                catch (Exception exc)
+                catch
                 {
-                    throw new Exception($"Error getting SQL type for {type.Name}: {exc.Message}");
+                    return new TypeSyntax($"/* {type.Name} not supported */", false);
                 }
             }
 
