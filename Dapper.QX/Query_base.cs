@@ -90,7 +90,7 @@ namespace Dapper.QX
                 var result = await dapperMethod.Invoke(ResolvedSql, queryParams);
                 stopwatch.Stop();
 
-                var qt = new QueryTrace(GetType().Name, ResolvedSql, queryParams, stopwatch.Elapsed);
+                var qt = new QueryTrace(GetType().Name, ResolvedSql, DebugSql, queryParams, stopwatch.Elapsed);
                 OnQueryExecuted(qt);
                 await OnQueryExecutedAsync(qt);
                 traces?.Add(qt);
@@ -99,7 +99,7 @@ namespace Dapper.QX
             }
             catch (Exception exc)
             {                
-                throw new QueryException(exc, ResolvedSql, queryParams);
+                throw new QueryException(exc, ResolvedSql, DebugSql, queryParams);
             }            
         }
 

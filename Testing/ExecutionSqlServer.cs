@@ -1,6 +1,7 @@
 ﻿using AdamOneilSoftware;
 using Dapper;
 using Dapper.QX;
+using Dapper.QX.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SqlIntegration.Library;
 using SqlIntegration.Library.Classes;
@@ -99,6 +100,17 @@ namespace Testing
             {
                 var results = new TypicalQuery() { PageNumber = 4 }.ExecuteAsync(cn).Result;
                 Assert.IsTrue(results.Count() == 20);
+            }
+        }
+
+        [TestMethod]
+        public void QueryWithTrace()
+        {
+            using (var cn = LocalDb.GetConnection(dbName))
+            {
+                List<QueryTrace> traces = new List<QueryTrace>();
+                var results = new TypicalQuery().ExecuteAsync(cn, traces: traces).Result;
+                Assert.IsTrue(traces.Count() == 1);
             }
         }
 
