@@ -18,8 +18,8 @@ namespace Dapper.QX
                 { typeof(long?), new TypeSyntax("bigint", false) },
                 { typeof(DateTime), new TypeSyntax("datetime", true) },
                 { typeof(DateTime?), new TypeSyntax("datetime", true) },
-                { typeof(bool), new TypeSyntax("bit", false) },
-                { typeof(bool?), new TypeSyntax("bit", false) },
+                { typeof(bool), new TypeSyntax("bit", false) { Transform = (value) => (value.Equals("True")) ? "1" : "0" } },
+                { typeof(bool?), new TypeSyntax("bit", false) { Transform = (value) => (value.Equals("True")) ? "1" : "0" } },
                 { typeof(decimal), new TypeSyntax("decimal", false) },
                 { typeof(decimal?), new TypeSyntax("decimal", false) }
             };            

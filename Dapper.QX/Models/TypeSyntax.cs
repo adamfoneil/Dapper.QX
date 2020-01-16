@@ -1,4 +1,6 @@
-﻿namespace Dapper.QX.Models
+﻿using System;
+
+namespace Dapper.QX.Models
 {
     internal class TypeSyntax
     {
@@ -10,12 +12,13 @@
 
         public string Type { get; set; }
         public bool IsString { get; set; }
+        public Func<string, string> Transform { get; set; }
 
         public string FormatValue(string value)
         {
-            return (IsString) ?
-                "'" + value?.Replace("'", "''") + "'" :
-                value;
+            return 
+                (IsString) ? "'" + value?.Replace("'", "''") + "'" :
+                (Transform != null) ? Transform.Invoke(value) : value;
         }
     }
 }
