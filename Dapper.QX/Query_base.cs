@@ -90,6 +90,8 @@ namespace Dapper.QX
                 var result = await dapperMethod.Invoke(ResolvedSql, queryParams);
                 stopwatch.Stop();
 
+                Debug.Print(DebugSql);
+
                 var qt = new QueryTrace(GetType().Name, ResolvedSql, DebugSql, queryParams, stopwatch.Elapsed);
                 OnQueryExecuted(qt);
                 await OnQueryExecutedAsync(qt);
