@@ -81,7 +81,7 @@ namespace Dapper.QX
 
         private async Task<DapperResult<T>> ExecuteInnerAsync<T>(Func<string, object, Task<DapperResult<T>>> dapperMethod, List<QueryTrace> traces = null)
         {
-            ResolvedSql = ResolveSql(out DynamicParameters queryParams);
+            ResolveSql(out DynamicParameters queryParams);
                         
             try
             {
@@ -126,14 +126,14 @@ namespace Dapper.QX
                 {
                     result = Regex.Replace(result, p.Token, p.ValueList, RegexOptions.IgnoreCase);                        
                 }
+
+                return result;
             }
             catch 
             {
                 // if any error, just give me what I started with
                 return resolvedSql;
-            }
-
-            return result;
+            }            
         }
 
         /// <summary>

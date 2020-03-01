@@ -54,12 +54,12 @@ namespace Dapper.QX
 
         private DapperResult<T> ExecuteInner<T>(Func<string, object, DapperResult<T>> dapperMethod, List<QueryTrace> traces = null)
         {
-            ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams);
-            DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + ResolvedSql;
-            Parameters = queryParams;
+            ResolveSql(out DynamicParameters queryParams);
 
             try
             {
+                Debug.Print(DebugSql);
+
                 var stopwatch = Stopwatch.StartNew();
                 var result = dapperMethod.Invoke(ResolvedSql, queryParams);
                 stopwatch.Stop();
