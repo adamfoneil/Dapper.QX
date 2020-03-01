@@ -43,7 +43,8 @@ namespace Dapper.QX
                     }
                 }
 
-                Dictionary<string, TypeValue> paramInfo = GetParamInfo(queryParams, query);
+                var supportedTypes = sqlTypes.Select(kp => kp.Key);
+                Dictionary<string, TypeValue> paramInfo = GetParamInfo(queryParams, query, supportedTypes);                
 
                 string declare = "DECLARE " + string.Join(", ", paramInfo.Select(kp => $"@{kp.Key} {getSqlType(kp.Value.Type).Type}")) + ";";
                 string set = string.Join("\r\n", paramInfo.Select(kp => $"SET @{kp.Key} = {getSqlType(kp.Value.Type).FormatValue(kp.Value.ValueLiteral)};"));
@@ -57,10 +58,10 @@ namespace Dapper.QX
             }
         }
 
-        private static Dictionary<string, TypeValue> GetParamInfo(DynamicParameters queryParams, object query)
+        private static Dictionary<string, TypeValue> GetParamInfo(DynamicParameters queryParams, object query, IEnumerable<Type> supportedTypes)
         {
             var typeMap = from prop in query.GetType().GetProperties()
-                          join param in queryParams.ParameterNames on prop.Name equals param
+                          join param in queryParams.ParameterNames on prop.Name equals param                          
                           select new
                           {
                               Name = param,
@@ -68,7 +69,13 @@ namespace Dapper.QX
                               Value = prop.GetValue(query)?.ToString()
                           };
 
-            return typeMap.ToDictionary(item => item.Name, item => new TypeValue() { Type = item.Type, ValueLiteral = item.Value });
+            return typeMap
+                .Where(tm => supportedTypes.Contains(tm.Type))
+                .ToDictionary(item => item.Name, item => new TypeValue() 
+                { 
+                    Type = item.Type, 
+                    ValueLiteral = item.Value 
+                });
         }
     }
 }

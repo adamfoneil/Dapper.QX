@@ -26,15 +26,13 @@ namespace Dapper.QX
 
         public string ResolveSql()
         {
-            ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams);
-            DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + ResolvedSql;
-            Parameters = queryParams;
-            return ResolvedSql;
+            return ResolveSql(out _);
         }
 
         public string ResolveSql(out DynamicParameters queryParams)
         {
             ResolvedSql = QueryHelper.ResolveSql(Sql, this, out queryParams);
+            DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + DebugResolveArrays(ResolvedSql);
             Parameters = queryParams;
             return ResolvedSql;
         }
@@ -83,9 +81,7 @@ namespace Dapper.QX
 
         private async Task<DapperResult<T>> ExecuteInnerAsync<T>(Func<string, object, Task<DapperResult<T>>> dapperMethod, List<QueryTrace> traces = null)
         {
-            ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams);
-            DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + InlineArrays(this, ResolvedSql);
-            Parameters = queryParams;
+            ResolvedSql = ResolveSql(out DynamicParameters queryParams);
                         
             try
             {
@@ -108,7 +104,7 @@ namespace Dapper.QX
             }            
         }
 
-        private string InlineArrays(object parameters, string resolvedSql)
+        public string DebugResolveArrays(string resolvedSql)
         {
             string result = resolvedSql;
 
@@ -116,10 +112,14 @@ namespace Dapper.QX
 
             try
             {
-                var props = parameters.GetType().GetProperties().Where(pi => pi.PropertyType.IsArray).Select(pi => new
+                var props = this.GetType().GetProperties().Where(pi => pi.PropertyType.IsArray).Select(pi =>
                 {
-                    Token = " IN @" + pi.Name.ToLower(),
-                    ValueList = " IN (" + string.Join(", ", pi.GetValue(parameters)) + ")"
+                    var values = pi.GetValue(this) as int[];
+                    return new
+                    {
+                        Token = " IN @" + pi.Name.ToLower(),
+                        ValueList = " IN (" + string.Join(", ", values) + ")"
+                    };
                 });
 
                 foreach (var p in props)
