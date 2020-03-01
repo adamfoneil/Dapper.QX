@@ -104,7 +104,7 @@ namespace Dapper.QX
             }            
         }
 
-        public string DebugResolveArrays(string resolvedSql)
+        private string DebugResolveArrays(string resolvedSql)
         {
             string result = resolvedSql;
 
