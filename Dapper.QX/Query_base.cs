@@ -86,11 +86,11 @@ namespace Dapper.QX
                         
             try
             {
+                Debug.Print(DebugSql);
+
                 var stopwatch = Stopwatch.StartNew();
                 var result = await dapperMethod.Invoke(ResolvedSql, queryParams);
-                stopwatch.Stop();
-
-                Debug.Print(DebugSql);
+                stopwatch.Stop();                
 
                 var qt = new QueryTrace(GetType().Name, ResolvedSql, DebugSql, queryParams, stopwatch.Elapsed);
                 OnQueryExecuted(qt);
