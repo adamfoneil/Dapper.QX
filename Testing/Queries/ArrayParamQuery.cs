@@ -13,6 +13,9 @@ namespace Testing.Queries
         public int[] IdList { get; set; }
     }
 
+    /// <summary>
+    /// not implemented
+    /// </summary>
     public class StringArrayParamQuery : Query<string>
     {
         public StringArrayParamQuery() : base("SELECT [Yes] FROM [Whatever] {where} ORDER BY [Yes]")
