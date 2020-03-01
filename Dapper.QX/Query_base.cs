@@ -1,10 +1,13 @@
 ﻿using Dapper.QX.Classes;
 using Dapper.QX.Exceptions;
+using Dapper.QX.Extensions;
 using Dapper.QX.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Dapper.QX
@@ -81,7 +84,7 @@ namespace Dapper.QX
         private async Task<DapperResult<T>> ExecuteInnerAsync<T>(Func<string, object, Task<DapperResult<T>>> dapperMethod, List<QueryTrace> traces = null)
         {
             ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams);
-            DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + ResolvedSql;
+            DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + InlineArrays(this, ResolvedSql);
             Parameters = queryParams;
                         
             try
@@ -103,6 +106,34 @@ namespace Dapper.QX
             {                
                 throw new QueryException(exc, ResolvedSql, DebugSql, queryParams);
             }            
+        }
+
+        private string InlineArrays(object parameters, string resolvedSql)
+        {
+            string result = resolvedSql;
+
+            // todo: add string delimiter, ensure pi.GetValue works with string.Join
+
+            try
+            {
+                var props = parameters.GetType().GetProperties().Where(pi => pi.PropertyType.IsArray).Select(pi => new
+                {
+                    Token = " IN @" + pi.Name.ToLower(),
+                    ValueList = " IN (" + string.Join(", ", pi.GetValue(parameters)) + ")"
+                });
+
+                foreach (var p in props)
+                {
+                    result = Regex.Replace(result, p.Token, p.ValueList, RegexOptions.IgnoreCase);                        
+                }
+            }
+            catch 
+            {
+                // if any error, just give me what I started with
+                return resolvedSql;
+            }
+
+            return result;
         }
 
         /// <summary>
