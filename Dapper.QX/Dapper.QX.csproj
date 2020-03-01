@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.8</Version>
+    <Version>1.0.9</Version>
     <Authors>Adam O'Neil</Authors>
     <Product>Dapper.QX</Product>
     <Description>More powerful and testable inline SQL used with Dapper</Description>
@@ -12,7 +12,7 @@
     <PackageProjectUrl>https://github.com/adamosoftware/Dapper.QX</PackageProjectUrl>
     <RepositoryUrl>https://github.com/adamosoftware/Dapper.QX</RepositoryUrl>
     <PackageTags>dapper inline-sql</PackageTags>
-    <PackageReleaseNotes>added Debug.Print for DebugSql, to make it easier to troubleshoot failed or unexpected queries</PackageReleaseNotes>
+    <PackageReleaseNotes>int arrays supported in DebugSql property</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
