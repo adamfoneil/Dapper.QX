@@ -1,6 +1,7 @@
 ﻿using Dapper.QX;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using Testing.Queries;
 
 namespace Testing
 {

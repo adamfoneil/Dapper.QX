@@ -41,7 +41,7 @@ namespace Dapper.QX
 
             string queryTypeName = parameters.GetType().Name;
 
-            result = ResolveInlineOptionalCriteria(result, properties, parameters, paramInfo);
+            result = ResolveInlineOptionalCriteria(result, parameters, paramInfo);
             result = ResolveOrderBy(result, parameters, queryTypeName);
             result = ResolveOptionalJoins(result, parameters);
             result = ResolveInjectedCriteria(result, paramInfo, properties, parameters, dynamicParams);
@@ -192,7 +192,7 @@ namespace Dapper.QX
             return sql;
         }
 
-        private static string ResolveInlineOptionalCriteria(string input, IEnumerable<PropertyInfo> properties, object parameters, QueryParameters paramInfo)
+        private static string ResolveInlineOptionalCriteria(string input, object parameters, QueryParameters paramInfo)
         {
             string result = input;
             foreach (var optional in paramInfo.Optional)
@@ -229,11 +229,18 @@ namespace Dapper.QX
         private static bool HasValue(PropertyInfo propertyInfo, object @object, out object value)
         {
             value = propertyInfo.GetValue(@object);
+
             if (value != null)
             {
+                if (propertyInfo.HasAttribute(out NullWhenAttribute attr))
+                {
+                    if (attr.NullValues?.Contains(value) ?? false) return false;
+                }
+
                 if (value.Equals(string.Empty)) return false;
                 return true;
             }
+
             return false;
         }
 
