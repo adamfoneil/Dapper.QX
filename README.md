@@ -80,5 +80,9 @@ public class QueryTests
     }
 }
 ```
+## Debugging
+To help you debug resolved SQL, place a breakpoint on any of the `Execute*` calls, and step over that line. Look in the Debug Output window to see the resolved SQL along with any parameter declarations. You can paste this directly into SSMS and execute.
+
+![img](https://adamosoftware.blob.core.windows.net/images/dapper-qx-debug.png)
 ----
 Please see also my Crud library [Dapper.CX](https://github.com/adamosoftware/Dapper.CX), Dapper.QX's companion library.
