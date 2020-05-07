@@ -102,6 +102,12 @@ namespace Testing
                 qry.DynamicParameters["minDate"] = new DateTime(1990, 1, 1);
                 var results = qry.Execute(cn);
                 Assert.IsTrue(qry.ResolvedSql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [SomeDate]>@minDate AND [FirstName] LIKE '%'+@firstName+'%' ORDER BY [FirstName]"));
+                Assert.IsTrue(qry.DebugSql.Equals(
+                    @"DECLARE @FirstName nvarchar(max), @minDate datetime;
+SET @FirstName = 'peabody';
+SET @minDate = '1/1/1990 12:00:00 AM';
+
+SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [SomeDate]>@minDate AND [FirstName] LIKE '%'+@firstName+'%' ORDER BY [FirstName]"));
             }
         }
         

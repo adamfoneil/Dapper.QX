@@ -69,13 +69,61 @@ namespace Dapper.QX
                               Value = prop.GetValue(query)?.ToString()
                           };
 
-            return typeMap
+            var result = typeMap
                 .Where(tm => supportedTypes.Contains(tm.Type))
                 .ToDictionary(item => item.Name, item => new TypeValue() 
                 { 
                     Type = item.Type, 
                     ValueLiteral = item.Value 
                 });
+
+            foreach (var paramName in queryParams.ParameterNames.Except(result.Keys))
+            {
+                if (discoverDynamicParamLiteral(paramName, out TypeValue typeValue)) result.Add(paramName, typeValue);
+            }
+
+            return result;
+
+            // there's no way to reflect types used within DynamicParameters, 
+            // so I have just try them all until one works
+            bool discoverDynamicParamLiteral(string paramName, out TypeValue typeValue)
+            {
+                Dictionary<Type, Func<string>> calls = new Dictionary<Type, Func<string>>()
+                {
+                    { typeof(string), () => queryParams.Get<string>(paramName) },
+                    { typeof(int), () => queryParams.Get<int>(paramName).ToString() },
+                    { typeof(int?), () => queryParams.Get<int?>(paramName).ToString() },
+                    { typeof(long), () => queryParams.Get<long>(paramName).ToString() },
+                    { typeof(long?), () => queryParams.Get<long?>(paramName).ToString() },
+                    { typeof(DateTime), () => queryParams.Get<DateTime>(paramName).ToString() },
+                    { typeof(DateTime?), () => queryParams.Get<DateTime?>(paramName).ToString() },
+                    { typeof(bool), () => queryParams.Get<bool>(paramName).ToString() },
+                    { typeof(bool?), () => queryParams.Get<bool?>(paramName).ToString() },
+                    { typeof(decimal), () => queryParams.Get<decimal>(paramName).ToString() },
+                    { typeof(decimal?), () => queryParams.Get<decimal?>(paramName).ToString() }
+                };
+
+                foreach (var kp in calls)
+                {
+                    try
+                    {
+                        typeValue = new TypeValue()
+                        {
+                            Type = kp.Key,
+                            ValueLiteral = calls[kp.Key].Invoke(),
+                            IsDynamic = true
+                        };
+                        return true;
+                    }
+                    catch 
+                    {
+                        // do nothing, just try the next type
+                    }
+                }
+
+                typeValue = null;
+                return false;
+            }
         }
     }
 }
