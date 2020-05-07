@@ -98,9 +98,11 @@ namespace Testing
         {
             using (var cn = LocalDb.GetConnection(dbName))
             {
-                var qry = new DynamicQuery("[SomeDate]>@minDate") { FirstName = "peabody" };
-                qry.DynamicParameters["minDate"] = new DateTime(1990, 1, 1);
-                var results = qry.Execute(cn);
+                var qry = new DynamicQuery("[SomeDate]>@minDate") { FirstName = "peabody" };                
+                var results = qry.Execute(cn, setParams: (queryParams) =>
+                {
+                    queryParams.Add("minDate", new DateTime(1990, 1, 1));
+                });
                 Assert.IsTrue(qry.ResolvedSql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [SomeDate]>@minDate AND [FirstName] LIKE '%'+@firstName+'%' ORDER BY [FirstName]"));
                 Assert.IsTrue(qry.DebugSql.ReplaceWhitespace().Equals(
                     @"DECLARE @FirstName nvarchar(max), @minDate datetime;

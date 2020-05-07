@@ -10,7 +10,7 @@ namespace Dapper.QX
 {
     public partial class Query<TResult>
     {
-        public IEnumerable<TResult> Execute(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null)
+        public IEnumerable<TResult> Execute(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
         {
             var result = ExecuteInner(
                 (string sql, object param) =>
@@ -19,12 +19,12 @@ namespace Dapper.QX
                     {
                         Enumerable = connection.Query<TResult>(sql, param, transaction, commandTimeout: commandTimeout, commandType: commandType)
                     };
-                }, traces);
+                }, traces, setParams);
 
             return result.Enumerable;
         }
 
-        public TResult ExecuteSingle(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null)
+        public TResult ExecuteSingle(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
         {
             var result = ExecuteInner(
                 (string sql, object param) =>
@@ -33,12 +33,12 @@ namespace Dapper.QX
                     {
                         Single = connection.QuerySingle<TResult>(sql, param, transaction, commandTimeout, commandType)
                     };
-                }, traces);
+                }, traces, setParams);
 
             return result.Single;
         }
 
-        public TResult ExecuteSingleOrDefault(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null)
+        public TResult ExecuteSingleOrDefault(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
         {
             var result = ExecuteInner(
                 (string sql, object param) =>
@@ -47,14 +47,14 @@ namespace Dapper.QX
                     {
                         Single = connection.QuerySingleOrDefault<TResult>(sql, param, transaction, commandTimeout, commandType)
                     };
-                }, traces);
+                }, traces, setParams);
 
             return result.Single;
         }
 
-        private DapperResult<T> ExecuteInner<T>(Func<string, object, DapperResult<T>> dapperMethod, List<QueryTrace> traces = null)
+        private DapperResult<T> ExecuteInner<T>(Func<string, object, DapperResult<T>> dapperMethod, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
         {
-            ResolveSql(out DynamicParameters queryParams);
+            ResolveSql(out DynamicParameters queryParams, setParams);
 
             try
             {
