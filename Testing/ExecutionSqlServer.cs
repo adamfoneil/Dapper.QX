@@ -92,6 +92,18 @@ namespace Testing
         {
             QueryHelper.Test<TypicalQuery>(() => LocalDb.GetConnection(dbName));
         }       
+
+        [TestMethod]
+        public void QueryDynamicParams()
+        {
+            using (var cn = LocalDb.GetConnection(dbName))
+            {
+                var qry = new DynamicQuery("[SomeDate]>@minDate") { FirstName = "peabody" };
+                qry.DynamicParameters["minDate"] = new DateTime(1990, 1, 1);
+                var results = qry.Execute(cn);
+                Assert.IsTrue(qry.ResolvedSql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [SomeDate]>@minDate AND [FirstName] LIKE '%'+@firstName+'%' ORDER BY [FirstName]"));
+            }
+        }
         
         [TestMethod]
         public void OffsetQueryAsync()
@@ -179,7 +191,7 @@ namespace Testing
                 MaxWeight = 56,
                 FirstNameLike = "warbler",
                 MinDate = new DateTime(2020, 1, 15)
-            };
+            };            
 
             qry.ResolveSql();
             string debug = qry.DebugSql;

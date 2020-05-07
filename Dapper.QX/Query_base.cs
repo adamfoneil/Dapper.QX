@@ -17,12 +17,18 @@ namespace Dapper.QX
         public Query(string sql)
         {
             Sql = sql;
+            DynamicParameters = new Dictionary<string, object>();
         }
 
         public string Sql { get; }
         public string ResolvedSql { get; private set; }
         public string DebugSql { get; private set; }
         public DynamicParameters Parameters { get; private set; }
+
+        /// <summary>
+        /// Passes parameters to the query that can't be modeled as properties
+        /// </summary>
+        public Dictionary<string, object> DynamicParameters { get; set; }
 
         public string ResolveSql()
         {
@@ -32,9 +38,29 @@ namespace Dapper.QX
         public string ResolveSql(out DynamicParameters queryParams)
         {
             ResolvedSql = QueryHelper.ResolveSql(Sql, this, out queryParams);
+            AddDynamicParams(queryParams);
             DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + DebugResolveArrays(ResolvedSql);
             Parameters = queryParams;
             return ResolvedSql;
+        }
+
+        private void AddDynamicParams(DynamicParameters queryParams)
+        {
+            if (DynamicParameters != null)
+            {
+                foreach (var kp in DynamicParameters)
+                {
+                    var pv = kp.Value as ParamValue;
+                    if (pv != null)
+                    {
+                        queryParams.Add(kp.Key, pv.Value, pv.Type, pv.Direction, pv.Size, pv.Precision, pv.Scale);
+                    }
+                    else
+                    {
+                        queryParams.Add(kp.Key, kp.Value);
+                    }
+                }
+            }
         }
 
         public async Task<IEnumerable<TResult>> ExecuteAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null)
@@ -81,8 +107,8 @@ namespace Dapper.QX
 
         private async Task<DapperResult<T>> ExecuteInnerAsync<T>(Func<string, object, Task<DapperResult<T>>> dapperMethod, List<QueryTrace> traces = null)
         {
-            ResolveSql(out DynamicParameters queryParams);
-                        
+            ResolveSql(out DynamicParameters queryParams);            
+
             try
             {
                 Debug.Print(DebugSql);
