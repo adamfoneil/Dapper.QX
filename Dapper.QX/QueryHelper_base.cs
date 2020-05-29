@@ -51,6 +51,28 @@ namespace Dapper.QX
             return result.Trim();
         }
 
+        public static string ResolveInjectedCriteria(string sql, IEnumerable<string> terms)
+        {
+            string result = sql;
+
+            if (sql.ContainsAnyOf(new string[] { WhereToken, AndWhereToken }, out string token))
+            {
+                Dictionary<string, string> keywordOptions = new Dictionary<string, string>()
+                {
+                    { WhereToken, "WHERE" },
+                    { AndWhereToken, "AND" }
+                };
+
+                result = result.Replace(token, (terms?.Any() ?? false) ?
+                    $"{keywordOptions[token]} {string.Join(" AND ", terms)}" :
+                    string.Empty);
+            }
+
+            result = RegexHelper.RemovePlaceholders(result);
+
+            return result.Trim();
+        }
+
         private static string ResolveOffset(string sql, object parameters)
         {
             string result = sql;
@@ -79,44 +101,29 @@ namespace Dapper.QX
 
         private static string ResolveInjectedCriteria(string sql, QueryParameters paramInfo, IEnumerable<PropertyInfo> properties, object parameters, DynamicParameters queryParams)
         {
-            string result = sql;
+            List<string> terms = new List<string>();
 
-            if (result.ContainsAnyOf(new string[] { WhereToken, AndWhereToken }, out string token))
+            foreach (var pi in properties)
             {
-                List<string> terms = new List<string>();
-
-                foreach (var pi in properties)
+                if (HasValue(pi, parameters, out object value) && paramInfo.IsOptional(pi))
                 {
-                    if (HasValue(pi, parameters, out object value) && paramInfo.IsOptional(pi))
+                    if (GetCaseExpression(pi, value, out string caseExpression))
                     {
-                        if (GetCaseExpression(pi, value, out string caseExpression))
-                        {
-                            terms.Add(caseExpression);
-                        }
-                        else if (GetWhereExpression(pi, out string whereExpression))
-                        {
-                            terms.Add(whereExpression);
-                        }
-                        else if (GetPhraseQuery(pi, value, out PhraseQuery phraseQuery))
-                        {
-                            queryParams.AddDynamicParams(phraseQuery.Parameters);
-                            terms.Add(phraseQuery.Expression);
-                        }
+                        terms.Add(caseExpression);
+                    }
+                    else if (GetWhereExpression(pi, out string whereExpression))
+                    {
+                        terms.Add(whereExpression);
+                    }
+                    else if (GetPhraseQuery(pi, value, out PhraseQuery phraseQuery))
+                    {
+                        queryParams.AddDynamicParams(phraseQuery.Parameters);
+                        terms.Add(phraseQuery.Expression);
                     }
                 }
-
-                Dictionary<string, string> keywordOptions = new Dictionary<string, string>()
-                {
-                    { WhereToken, "WHERE" },
-                    { AndWhereToken, "AND" }
-                };
-
-                result = result.Replace(token, (terms.Any()) ?
-                    $"{keywordOptions[token]} {string.Join(" AND ", terms)}" :
-                    string.Empty);
             }
 
-            return result;
+            return ResolveInjectedCriteria(sql, terms);
         }
 
         private static bool GetPhraseQuery(PropertyInfo pi, object value, out PhraseQuery phraseQuery)
