@@ -45,13 +45,13 @@ namespace Dapper.QX
             result = ResolveOrderBy(result, parameters, queryTypeName);
             result = ResolveOptionalJoins(result, parameters);
             result = ResolveInjectedCriteria(result, paramInfo, properties, parameters, dynamicParams);
-            result = ResolveOffset(result, parameters, queryTypeName);
+            result = ResolveOffset(result, parameters);
             result = RegexHelper.RemovePlaceholders(result);
 
             return result.Trim();
         }
 
-        private static string ResolveOffset(string sql, object parameters, string queryTypeName)
+        private static string ResolveOffset(string sql, object parameters)
         {
             string result = sql;
 
