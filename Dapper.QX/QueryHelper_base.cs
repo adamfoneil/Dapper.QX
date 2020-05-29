@@ -68,9 +68,7 @@ namespace Dapper.QX
                     string.Empty);
             }
 
-            result = RegexHelper.RemovePlaceholders(result);
-
-            return result.Trim();
+            return result;
         }
 
         private static string ResolveOffset(string sql, object parameters)

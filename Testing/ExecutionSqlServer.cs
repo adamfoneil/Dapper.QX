@@ -119,6 +119,7 @@ namespace Testing
             using (var cn = LocalDb.GetConnection(dbName))
             {
                 var results = new TypicalQuery() { PageNumber = 4 }.ExecuteAsync(cn).Result;
+                Debug.Print($"result count = {results.Count()}");
                 Assert.IsTrue(results.Count() == 20);
             }
         }
@@ -140,6 +141,7 @@ namespace Testing
             using (var cn = LocalDb.GetConnection(dbName))
             {
                 var results = new TypicalQuery() { PageNumber = 4 }.Execute(cn);
+                Debug.Print($"result count = {results.Count()}");
                 Assert.IsTrue(results.Count() == 20);
             }
         }
