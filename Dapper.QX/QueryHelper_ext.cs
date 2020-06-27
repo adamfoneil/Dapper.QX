@@ -16,6 +16,17 @@ namespace Dapper.QX
         public static void Test<TQuery>(Func<IDbConnection> getConnection) where TQuery : ITestableQuery, new()
         {
             var qry = new TQuery();
+            TestInner(getConnection, qry);
+        }
+
+        public static void Test<TQuery>(Func<TQuery> createQuery, Func<IDbConnection> getConnection) where TQuery : ITestableQuery
+        {
+            var qry = createQuery.Invoke();
+            TestInner(getConnection, qry);
+        }
+
+        private static void TestInner<TQuery>(Func<IDbConnection> getConnection, TQuery qry) where TQuery : ITestableQuery
+        {
             using (var cn = getConnection.Invoke())
             {
                 foreach (var testCase in qry.GetTestCases())
