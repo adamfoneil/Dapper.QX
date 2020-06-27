@@ -91,7 +91,13 @@ namespace Testing
         public void TypicalQuery()
         {
             QueryHelper.Test<TypicalQuery>(() => LocalDb.GetConnection(dbName));
-        }       
+        }
+
+        [TestMethod]
+        public void TypicalTestableQuery()
+        {
+            QueryHelper.Test<TestableQuerySample>(() => LocalDb.GetConnection(dbName));
+        }
 
         [TestMethod]
         public void QueryDynamicParams()
