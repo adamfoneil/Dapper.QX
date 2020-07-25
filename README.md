@@ -48,7 +48,7 @@ public class MyQuery : TestableQuery<MyResultClass>
 {
     // same code above omitted
   
-    // implement GetTestCases method to return every parameter combination you need to test
+    // implement GetTestCasesInner method to return every parameter combination you need to test
     protected IEnumerable<ITestableQuery> GetTestCasesInner()
     {
         yield return new MyQuery() { MinDate = DateTime.Now };
