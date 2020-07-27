@@ -41,14 +41,15 @@ Use **{where}** or **{andWhere}** tokens to indicate where dynamic criteria is i
 To help you build C# result classes for any SQL query, I offer a free tool [Postulate.Zinger](https://github.com/adamosoftware/Postulate.Zinger).
 
 ## Testing
-Make query classes testable with the [ITestableQuery](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Interfaces/ITestableQuery.cs) interface. This approach catches invalid SQL, but does not assert any particular query results.
+Make query classes testable by basing them on [TestableQuery](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Abstract/TestableQuery.cs). This approach catches invalid SQL, but does not assert any particular query results.
+
 ```csharp
-public class MyQuery : Query<MyResultClass>, ITestableQuery
+public class MyQuery : TestableQuery<MyResultClass>
 {
     // same code above omitted
   
-    // implement GetTestCases method to return every parameter combination you need to test
-    public IEnumerable<ITestableQuery> GetTestCases()
+    // implement GetTestCasesInner method to return every parameter combination you need to test
+    protected IEnumerable<ITestableQuery> GetTestCasesInner()
     {
         yield return new MyQuery() { MinDate = DateTime.Now };
         yield return new MyQuery() { MaxDate = DateTime.Now };
@@ -56,15 +57,9 @@ public class MyQuery : Query<MyResultClass>, ITestableQuery
         yield return new MyQuery() { AssignedTo = "-1" };
         yield return new MyQuery() { AssignedTo = "anyone" };
     }
-  
-    // implement TestExecute the same way always
-    public IEnumerable<dynamic> TestExecute(IDbConnection connection)
-    {
-        return TestExecuteHelper(connection);
-    }
 }
 ```
-Now, in your unit test project, use the [QueryHelper.Test](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/QueryHelper_ext.cs#L16) method for each of your queries. A good way to test queries on a SQL Server localdb instance is to use my [SqlServer.LocalDb.Testing](https://github.com/adamosoftware/SqlServer.LocalDb) package. You can see how it's used in Dapper.QX's own [tests](https://github.com/adamosoftware/Dapper.QX/blob/master/Testing/ExecutionSqlServer.cs#L93).
+Now, in your unit test project, use the [QueryHelper.Test](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/QueryHelper_ext.cs#L16) method for each of your queries. A good way to test queries on a SQL Server localdb instance is to use my [SqlServer.LocalDb.Testing](https://github.com/adamfoneil/SqlServer.LocalDb) package. You can see how it's used in Dapper.QX's own [tests](https://github.com/adamfoneil/Dapper.QX/blob/master/Testing/ExecutionSqlServer.cs#L93).
 ```csharp
 [TestClass]
 public class QueryTests
