@@ -70,10 +70,7 @@ public class QueryTests
     }
 
     [TestMethod]
-    public void MyQuery()
-    {
-        QueryHelper.Test<MyQuery>(GetConnection);
-    }
+    public void MyQuery() => QueryHelper.Test<MyQuery>(GetConnection);    
 }
 ```
 ## Debugging
