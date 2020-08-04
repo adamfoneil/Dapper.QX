@@ -57,6 +57,8 @@ This approach makes sense when you have just one query to run, and you don't nee
 ## Testing
 Make query classes testable by basing them on [TestableQuery](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Abstract/TestableQuery.cs). This approach catches invalid SQL, but does not assert any particular query results.
 
+Note that you can also use the interface [ITestableQuery](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Interfaces/ITestableQuery.cs) directly if you wish, but you must implement [TestExecute](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Interfaces/ITestableQuery.cs#L12) yourself. There's normally no reason to do this, since I use the same [implementation](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Abstract/TestableQuery.cs#L15) everywhere. Therefore, I recommend using the abstract class `TestableQuery` instead of `ITestableQuery`.
+
 ```csharp
 public class MyQuery : TestableQuery<MyResultClass>
 {
