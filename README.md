@@ -36,12 +36,28 @@ using (var cn = GetConnection())
     }.ExecuteAsync(cn);
 }
 ```
+In the example above `GetConnection` is a fictional method -- you will need to provide your own method that returns an `IDbConnection` that works in your project. Read on below for an alternate syntax that lets you omit the `using` block.
+
 Use **{where}** or **{andWhere}** tokens to indicate where dynamic criteria is inserted. Mix and match [Where](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Attributes/Where.cs) and [Case](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Attributes/Case.cs) attributes on query class properties to control what criteria is injected. [Learn about](https://github.com/adamosoftware/Dapper.QX/wiki/Reference) more attributes Dapper.QX offers.
 
 To help you build C# result classes for any SQL query, I offer a free tool [Postulate.Zinger](https://github.com/adamosoftware/Postulate.Zinger).
 
+Note that you can omit the `using` block if you use the `Execute*` [overloads](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Query_func.cs) that accept a `Func<IDbConnection>` instead of `IDbConnection`. This assumes you still have a method in your project that returns `IDbConnection`. Adapting the example above, this would look like this:
+
+```csharp
+var data = await new MyQuery() 
+{
+    MinDate = DateTime.Now, 
+    MaxDate = DateTime.Now.AddDays(30),
+    AssignedTo = "somebody"
+}.ExecuteAsync(GetConnection);
+```
+This approach makes sense when you have just one query to run, and you don't need the database connection for anything else.
+
 ## Testing
 Make query classes testable by basing them on [TestableQuery](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Abstract/TestableQuery.cs). This approach catches invalid SQL, but does not assert any particular query results.
+
+Note that you can also use the interface [ITestableQuery](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Interfaces/ITestableQuery.cs) directly if you wish, but you must implement [TestExecute](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Interfaces/ITestableQuery.cs#L12) yourself. There's normally no reason to do this, since I use the same [implementation](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Abstract/TestableQuery.cs#L15) everywhere. Therefore, I recommend using the abstract class `TestableQuery` instead of `ITestableQuery`.
 
 ```csharp
 public class MyQuery : TestableQuery<MyResultClass>
@@ -70,10 +86,7 @@ public class QueryTests
     }
 
     [TestMethod]
-    public void MyQuery()
-    {
-        QueryHelper.Test<MyQuery>(GetConnection);
-    }
+    public void MyQuery() => QueryHelper.Test<MyQuery>(GetConnection);    
 }
 ```
 ## Debugging
