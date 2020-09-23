@@ -24,21 +24,21 @@ namespace Dapper.QX
         public string DebugSql { get; private set; }
         public DynamicParameters Parameters { get; private set; }
 
-        public string ResolveSql()
+        public string ResolveSql(int newPageSize = 0)
         {
-            return ResolveSql(out _);
+            return ResolveSql(out _, newPageSize: newPageSize);
         }
 
-        public string ResolveSql(out DynamicParameters queryParams, Action<DynamicParameters> setParams = null)
+        public string ResolveSql(out DynamicParameters queryParams, Action<DynamicParameters> setParams = null, int newPageSize = 0)
         {
-            ResolvedSql = QueryHelper.ResolveSql(Sql, this, out queryParams);
+            ResolvedSql = QueryHelper.ResolveSql(Sql, this, out queryParams, newPageSize);
             setParams?.Invoke(queryParams);            
             DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + DebugResolveArrays(ResolvedSql);
             Parameters = queryParams;
             return ResolvedSql;
         }
 
-        public async Task<IEnumerable<TResult>> ExecuteAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
+        public async Task<IEnumerable<TResult>> ExecuteAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
         {
             var result = await ExecuteInnerAsync(
                 async (string sql, object param) =>
@@ -47,7 +47,7 @@ namespace Dapper.QX
                     {
                         Enumerable = await connection.QueryAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
                     };
-                }, traces, setParams);
+                }, traces, setParams, newPageSize);
 
             return result.Enumerable;
         }
@@ -80,9 +80,9 @@ namespace Dapper.QX
             return result.Single;
         }
 
-        private async Task<DapperResult<T>> ExecuteInnerAsync<T>(Func<string, object, Task<DapperResult<T>>> dapperMethod, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
+        private async Task<DapperResult<T>> ExecuteInnerAsync<T>(Func<string, object, Task<DapperResult<T>>> dapperMethod, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
         {
-            ResolveSql(out DynamicParameters queryParams, setParams);            
+            ResolveSql(out DynamicParameters queryParams, setParams, newPageSize);
 
             try
             {

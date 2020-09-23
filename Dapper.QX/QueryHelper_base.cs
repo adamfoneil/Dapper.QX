@@ -16,12 +16,12 @@ namespace Dapper.QX
         public const string AndWhereToken = "{andWhere}";
         public const string OffsetToken = "{offset}";
 
-        public static string ResolveSql(string sql, object parameters)
+        public static string ResolveSql(string sql, object parameters, int newPageSize = 0)
         {
-            return ResolveSql(sql, parameters, out _);
+            return ResolveSql(sql, parameters, out _, newPageSize);
         }
 
-        public static string ResolveSql(string sql, object parameters, out DynamicParameters dynamicParams)
+        public static string ResolveSql(string sql, object parameters, out DynamicParameters dynamicParams, int newPageSize = 0)
         {
             if (sql is null)
             {
@@ -45,7 +45,7 @@ namespace Dapper.QX
             result = ResolveOrderBy(result, parameters, queryTypeName);
             result = ResolveOptionalJoins(result, parameters);
             result = ResolveInjectedCriteria(result, paramInfo, properties, parameters, dynamicParams);
-            result = ResolveOffset(result, parameters);
+            result = ResolveOffset(result, parameters, newPageSize);
             result = RegexHelper.RemovePlaceholders(result);
 
             return result.Trim();
@@ -71,7 +71,7 @@ namespace Dapper.QX
             return result;
         }
 
-        private static string ResolveOffset(string sql, object parameters)
+        private static string ResolveOffset(string sql, object parameters, int newPageSize = 0)
         {
             string result = sql;
 
@@ -79,7 +79,7 @@ namespace Dapper.QX
             {
                 var offsetAttr = offsetProperty.GetCustomAttribute<OffsetAttribute>();
                 int page = (int)offsetProperty.GetValue(parameters);
-                result = result.Replace(OffsetToken, offsetAttr.GetOffsetFetchSyntax(page));
+                result = result.Replace(OffsetToken, offsetAttr.GetOffsetFetchSyntax(page, newPageSize));
             }
 
             return result;

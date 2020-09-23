@@ -61,5 +61,23 @@ namespace Testing
             // two queries should be the same
             Assert.IsTrue(qry1.ResolveSql().Equals(qry2.ResolveSql()));
         }
+
+        [TestMethod]
+        public void QueryNewPageSize()
+        {
+            var qry = new TypicalQuery();
+            qry.PageNumber = 10;
+            var sql = qry.ResolveSql(newPageSize: 5);
+            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable]  ORDER BY [FirstName] OFFSET 50 ROWS FETCH NEXT 5 ROWS ONLY"));
+        }
+
+        [TestMethod]
+        public void QueryDefaultPageSize()
+        {
+            var qry = new TypicalQuery();
+            qry.PageNumber = 10;
+            var sql = qry.ResolveSql();
+            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable]  ORDER BY [FirstName] OFFSET 200 ROWS FETCH NEXT 20 ROWS ONLY"));
+        }
     }
 }

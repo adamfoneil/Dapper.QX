@@ -18,14 +18,16 @@ namespace Dapper.QX.Attributes
 
         public int PageSize { get; }
 
-        public int GetStartRow(int page)
+        public int GetStartRow(int page, int newPageSize = 0)
         {
-            return page * PageSize;
+            return page * ResolvePageSize(newPageSize);
         }
 
-        public string GetOffsetFetchSyntax(int page)
-        {
-            return $"OFFSET {GetStartRow(page)} ROWS FETCH NEXT {PageSize} ROWS ONLY";
+        public string GetOffsetFetchSyntax(int page, int newPageSize = 0)
+        {            
+            return $"OFFSET {GetStartRow(page, newPageSize)} ROWS FETCH NEXT {ResolvePageSize(newPageSize)} ROWS ONLY";
         }
+
+        private int ResolvePageSize(int newPageSize) => (newPageSize > 0) ? newPageSize : PageSize;
     }
 }
