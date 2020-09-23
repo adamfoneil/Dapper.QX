@@ -131,6 +131,17 @@ namespace Testing
         }
 
         [TestMethod]
+        public void OffsetQueryNewPageSize()
+        {
+            using (var cn = LocalDb.GetConnection(dbName))
+            {
+                var results = new TypicalQuery() { PageNumber = 4 }.ExecuteAsync(cn, newPageSize: 10).Result;
+                Debug.Print($"result count = {results.Count()}");
+                Assert.IsTrue(results.Count() == 10);
+            }
+        }
+
+        [TestMethod]
         public void QueryWithTrace()
         {
             using (var cn = LocalDb.GetConnection(dbName))
