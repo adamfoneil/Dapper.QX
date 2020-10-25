@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.18</Version>
+    <Version>1.0.19</Version>
     <Authors>Adam O'Neil</Authors>
     <Product>Dapper.QX</Product>
     <Description>More powerful and testable inline SQL used with Dapper</Description>
@@ -12,7 +12,7 @@
     <PackageProjectUrl>https://github.com/adamosoftware/Dapper.QX</PackageProjectUrl>
     <RepositoryUrl>https://github.com/adamosoftware/Dapper.QX</RepositoryUrl>
     <PackageTags>dapper inline-sql</PackageTags>
-    <PackageReleaseNotes>https://github.com/adamfoneil/Dapper.QX/issues/17</PackageReleaseNotes>
+    <PackageReleaseNotes>newPageSize argument added to Execute* overloads that take a Func&lt;IDbConnection&gt;</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

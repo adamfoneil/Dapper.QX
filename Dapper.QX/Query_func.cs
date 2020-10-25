@@ -8,11 +8,11 @@ namespace Dapper.QX
 {
     public partial class Query<TResult>
     {
-        public async Task<IEnumerable<TResult>> ExecuteAsync(Func<IDbConnection> getConnection, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
+        public async Task<IEnumerable<TResult>> ExecuteAsync(Func<IDbConnection> getConnection, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
         {
             using (var cn = getConnection.Invoke())
             {
-                return await ExecuteAsync(cn, null, commandTimeout, commandType, traces, setParams);
+                return await ExecuteAsync(cn, null, commandTimeout, commandType, traces, setParams, newPageSize);
             }
         }
 
@@ -32,11 +32,11 @@ namespace Dapper.QX
             }
         }
 
-        public IEnumerable<TResult> Execute(Func<IDbConnection> getConnection, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
+        public IEnumerable<TResult> Execute(Func<IDbConnection> getConnection, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
         {
             using (var cn = getConnection.Invoke())
             {
-                return Execute(cn, null, commandTimeout, commandType, traces, setParams);
+                return Execute(cn, null, commandTimeout, commandType, traces, setParams, newPageSize);
             }
         }
 
