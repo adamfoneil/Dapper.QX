@@ -97,5 +97,7 @@ Note the extra indent you're seeing in the SQL is because of whitespace in the s
 ## Tooling
 To help you build C# result classes for any SQL query, I offer a free tool [Postulate.Zinger](https://github.com/adamosoftware/Postulate.Zinger).
 
+[Download](https://aosoftware.blob.core.windows.net/install/ZingerSetup.exe)
+
 ----
 Please see also my Crud library [Dapper.CX](https://github.com/adamosoftware/Dapper.CX), Dapper.QX's companion library.
