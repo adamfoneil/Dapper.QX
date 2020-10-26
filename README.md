@@ -40,8 +40,6 @@ In the example above `GetConnection` is a fictional method -- you will need to p
 
 Use **{where}** or **{andWhere}** tokens to indicate where dynamic criteria is inserted. Mix and match [Where](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Attributes/Where.cs) and [Case](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Attributes/Case.cs) attributes on query class properties to control what criteria is injected. [Learn about](https://github.com/adamosoftware/Dapper.QX/wiki/Reference) more attributes Dapper.QX offers.
 
-To help you build C# result classes for any SQL query, I offer a free tool [Postulate.Zinger](https://github.com/adamosoftware/Postulate.Zinger).
-
 Note that you can omit the `using` block if you use the `Execute*` [overloads](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Query_func.cs) that accept a `Func<IDbConnection>` instead of `IDbConnection`. This assumes you still have a method in your project that returns `IDbConnection`. Adapting the example above, this would look like this:
 
 ```csharp
@@ -95,6 +93,9 @@ To help you debug resolved SQL, place a breakpoint on any of the `Execute*` call
 ![img](https://adamosoftware.blob.core.windows.net/images/dapper-qx-debug.png)
 
 Note the extra indent you're seeing in the SQL is because of whitespace in the sample query's [source file](https://github.com/adamosoftware/Ginseng8/blob/dapper-qx/Ginseng8.Mvc/Queries/OpenWorkItems.cs#L218) from where I took this screenshot. In the source file, the SQL is stored with a verbatim string, so the indent is preserved.
+
+## Tooling
+To help you build C# result classes for any SQL query, I offer a free tool [Postulate.Zinger](https://github.com/adamosoftware/Postulate.Zinger).
 
 ----
 Please see also my Crud library [Dapper.CX](https://github.com/adamosoftware/Dapper.CX), Dapper.QX's companion library.
