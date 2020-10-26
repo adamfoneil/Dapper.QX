@@ -52,6 +52,11 @@ var data = await new MyQuery()
 ```
 This approach makes sense when you have just one query to run, and you don't need the database connection for anything else.
 
+## Tooling
+To help you build C# result classes for any SQL query, I offer a free tool [Postulate.Zinger](https://github.com/adamosoftware/Postulate.Zinger).
+
+[![download](https://img.shields.io/badge/Download-Installer-blue.svg)](https://aosoftware.blob.core.windows.net/install/ZingerSetup.exe)
+
 ## Testing
 Make query classes testable by basing them on [TestableQuery](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Abstract/TestableQuery.cs). This approach catches invalid SQL, but does not assert any particular query results.
 
@@ -93,11 +98,6 @@ To help you debug resolved SQL, place a breakpoint on any of the `Execute*` call
 ![img](https://adamosoftware.blob.core.windows.net/images/dapper-qx-debug.png)
 
 Note the extra indent you're seeing in the SQL is because of whitespace in the sample query's [source file](https://github.com/adamosoftware/Ginseng8/blob/dapper-qx/Ginseng8.Mvc/Queries/OpenWorkItems.cs#L218) from where I took this screenshot. In the source file, the SQL is stored with a verbatim string, so the indent is preserved.
-
-## Tooling
-To help you build C# result classes for any SQL query, I offer a free tool [Postulate.Zinger](https://github.com/adamosoftware/Postulate.Zinger).
-
-[Download](https://aosoftware.blob.core.windows.net/install/ZingerSetup.exe)
 
 ----
 Please see also my Crud library [Dapper.CX](https://github.com/adamosoftware/Dapper.CX), Dapper.QX's companion library.
