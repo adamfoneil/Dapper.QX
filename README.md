@@ -40,8 +40,6 @@ In the example above `GetConnection` is a fictional method -- you will need to p
 
 Use **{where}** or **{andWhere}** tokens to indicate where dynamic criteria is inserted. Mix and match [Where](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Attributes/Where.cs) and [Case](https://github.com/adamosoftware/Dapper.QX/blob/master/Dapper.QX/Attributes/Case.cs) attributes on query class properties to control what criteria is injected. [Learn about](https://github.com/adamosoftware/Dapper.QX/wiki/Reference) more attributes Dapper.QX offers.
 
-To help you build C# result classes for any SQL query, I offer a free tool [Postulate.Zinger](https://github.com/adamosoftware/Postulate.Zinger).
-
 Note that you can omit the `using` block if you use the `Execute*` [overloads](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Query_func.cs) that accept a `Func<IDbConnection>` instead of `IDbConnection`. This assumes you still have a method in your project that returns `IDbConnection`. Adapting the example above, this would look like this:
 
 ```csharp
@@ -53,6 +51,11 @@ var data = await new MyQuery()
 }.ExecuteAsync(GetConnection);
 ```
 This approach makes sense when you have just one query to run, and you don't need the database connection for anything else.
+
+## Tooling
+To help you build C# result classes for any SQL query, I offer a free tool [Postulate.Zinger](https://github.com/adamosoftware/Postulate.Zinger).
+
+[![download](https://img.shields.io/badge/Download-Installer-blue.svg)](https://aosoftware.blob.core.windows.net/install/ZingerSetup.exe)
 
 ## Testing
 Make query classes testable by basing them on [TestableQuery](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Abstract/TestableQuery.cs). This approach catches invalid SQL, but does not assert any particular query results.
