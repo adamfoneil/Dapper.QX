@@ -58,7 +58,7 @@ To help you build C# result classes for any SQL query, I offer a free tool [Post
 [![download](https://img.shields.io/badge/Download-Installer-blue.svg)](https://aosoftware.blob.core.windows.net/install/ZingerSetup.exe)
 
 ## Testing
-Make query classes testable by basing them on [TestableQuery](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Abstract/TestableQuery.cs). This approach catches invalid SQL, but does not assert any particular query results.
+Make query classes testable by basing them on [TestableQuery](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Abstract/TestableQuery.cs). This approach catches invalid SQL, but does not assert any particular query results. See the [wiki topic](https://github.com/adamfoneil/Dapper.QX/wiki/Testing-Tips) for more info.
 
 Note that you can also use the interface [ITestableQuery](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Interfaces/ITestableQuery.cs) directly if you wish, but you must implement [TestExecute](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Interfaces/ITestableQuery.cs#L12) yourself. There's normally no reason to do this, since I use the same [implementation](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Abstract/TestableQuery.cs#L15) everywhere. Therefore, I recommend using the abstract class `TestableQuery` instead of `ITestableQuery`.
 
