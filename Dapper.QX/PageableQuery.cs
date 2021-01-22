@@ -46,9 +46,14 @@ namespace Dapper.QX
         {
             int pageSize = (newPageSize > 0) ? newPageSize : DefaultPageSize;
 
+            var currentPage = this.Page;
+
             this.Page = null;
             var results = await ExecuteAsync(connection, newPageSize: newPageSize);
             int count = results.Count();
+
+            this.Page = currentPage;
+
             return new ResultMetrics()
             {
                 Rows = count,
