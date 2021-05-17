@@ -16,9 +16,9 @@ namespace Testing.Queries
         public int Id { get; set; }
     }
 
-    public class TypicalQuery : Query<TypicalQueryResult>, ITestableQuery
+    public class TypicalQuery : Query<TypicalQueryResult>, ITestableQuery, ISelfModifyingQuery
     {
-        public TypicalQuery() : base("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] {where} ORDER BY [FirstName] {offset}")
+        public TypicalQuery() : base("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] {where} %removethis% ORDER BY [FirstName] {offset}")
         {
         }
 
@@ -43,6 +43,11 @@ namespace Testing.Queries
         [Offset(20)]
         public int? PageNumber { get; set; }
 
+        /// <summary>
+        /// not a practical example, but demonstrates how query can be "self-modified" when run
+        /// </summary>
+        public string BuildSql(string rawSql) => rawSql.Replace("%removethis% ", string.Empty);
+        
         public IEnumerable<ITestableQuery> GetTestCases()
         {
             yield return new TypicalQuery() { MinWeight = 10 };

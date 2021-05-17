@@ -1,6 +1,7 @@
 ﻿using Dapper.QX.Attributes;
 using Dapper.QX.Classes;
 using Dapper.QX.Extensions;
+using Dapper.QX.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace Dapper.QX
                 return RegexHelper.RemovePlaceholders(sql);
             }
 
-            string result = sql;
+            string result = (parameters is ISelfModifyingQuery qry) ? qry.BuildSql(sql) : sql;
 
             var properties = GetParamProperties(parameters, sql, out QueryParameters paramInfo);
             dynamicParams = GetDynamicParameters(properties, parameters);
