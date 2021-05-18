@@ -220,7 +220,7 @@ namespace Testing
                 MinDate = new DateTime(2020, 1, 15)
             };            
 
-            qry.ResolveSql();
+            qry.ResolveSql(removeMacros: true);
             string debug = qry.DebugSql;
             Assert.IsTrue(debug.ReplaceWhitespace().Equals(
                 @"DECLARE @MinWeight decimal, @MaxWeight decimal, @FirstNameLike nvarchar(max), @MinDate datetime;
@@ -229,7 +229,7 @@ namespace Testing
                 SET @FirstNameLike = 'warbler';
                 SET @MinDate = '1/15/2020 12:00:00 AM';
 
-                SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [Weight]>=@minWeight AND [Weight]<=@maxWeight AND [FirstName] LIKE '%'+@firstNameLike+'%' AND [SomeDate]>=@minDate ORDER BY [FirstName]".ReplaceWhitespace()));      
+                SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [Weight]>=@minWeight AND [Weight]<=@maxWeight AND [FirstName] LIKE '%'+@firstNameLike+'%' AND [SomeDate]>=@minDate  ORDER BY [FirstName]".ReplaceWhitespace()));      
         }
     }
 }

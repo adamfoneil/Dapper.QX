@@ -49,6 +49,12 @@ namespace Dapper.QX.Extensions
             foreach (Match m in matches) yield return m.Value;
         }
 
+        public static IEnumerable<string> ParseMacros(string input)
+        {
+            var matches = Regex.Matches(input, @"\<<([^>>]+)\>>");
+            return matches.OfType<Match>().Select(m => m.Value);
+        }
+
         public static IEnumerable<OptionalToken> ParseOptionalTokens(string input, bool cleaned = false)
         {
             // thanks to https://www.regextester.com/97707
@@ -63,6 +69,14 @@ namespace Dapper.QX.Extensions
                 Content = m.Value.Substring(markerLength, m.Value.Length - (markerLength * 2)).Trim(),
                 ParameterNames = ParseParameterNames(m.Value, cleaned).ToArray()
             });
+        }
+
+        public static string RemoveMacros(string input)
+        {            
+            var macros = ParseMacros(input);
+            var result = input;
+            foreach (var macro in macros) result = result.Replace(macro, string.Empty);
+            return result;
         }
 
         public static string RemoveOptionalTokens(string input)

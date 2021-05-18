@@ -24,14 +24,14 @@ namespace Dapper.QX
         public string DebugSql { get; private set; }
         public DynamicParameters Parameters { get; private set; }
 
-        public string ResolveSql(int newPageSize = 0)
+        public string ResolveSql(int newPageSize = 0, bool removeMacros = false)
         {
-            return ResolveSql(out _, newPageSize: newPageSize);
+            return ResolveSql(out _, newPageSize: newPageSize, removeMacros: removeMacros);
         }
 
-        public string ResolveSql(out DynamicParameters queryParams, Action<DynamicParameters> setParams = null, int newPageSize = 0)
+        public string ResolveSql(out DynamicParameters queryParams, Action<DynamicParameters> setParams = null, int newPageSize = 0, bool removeMacros = false)
         {
-            ResolvedSql = QueryHelper.ResolveSql(Sql, this, out queryParams, newPageSize);
+            ResolvedSql = QueryHelper.ResolveSql(Sql, this, out queryParams, newPageSize, removeMacros);
             setParams?.Invoke(queryParams);            
             DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + DebugResolveArrays(ResolvedSql);
             Parameters = queryParams;
@@ -40,7 +40,7 @@ namespace Dapper.QX
 
         public async Task<IEnumerable<TResult>> ExecuteAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
         {
-            var result = await ExecuteInnerAsync(
+            var result = await ExecuteInnerAsync(connection,
                 async (string sql, object param) =>
                 {
                     return new DapperResult<TResult>()
@@ -54,7 +54,7 @@ namespace Dapper.QX
 
         public async Task<TResult> ExecuteSingleAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
         {
-            var result = await ExecuteInnerAsync(
+            var result = await ExecuteInnerAsync(connection,
                 async (string sql, object param) =>
                 {
                     return new DapperResult<TResult>()
@@ -68,7 +68,7 @@ namespace Dapper.QX
 
         public async Task<TResult> ExecuteSingleOrDefaultAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
         {
-            var result = await ExecuteInnerAsync(
+            var result = await ExecuteInnerAsync(connection,
                 async (string sql, object param) =>
                 {
                     return new DapperResult<TResult>()
@@ -80,12 +80,21 @@ namespace Dapper.QX
             return result.Single;
         }
 
-        private async Task<DapperResult<T>> ExecuteInnerAsync<T>(Func<string, object, Task<DapperResult<T>>> dapperMethod, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
+        private async Task<DapperResult<T>> ExecuteInnerAsync<T>(IDbConnection connection, Func<string, object, Task<DapperResult<T>>> dapperMethod, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
         {
             ResolveSql(out DynamicParameters queryParams, setParams, newPageSize);
 
-            try
+            var macros = RegexHelper.ParseMacros(ResolvedSql);
+            var macroInserts = await ResolveMacrosAsync(connection, macros);
+
+            foreach (var macro in macroInserts)
             {
+                ResolvedSql = ResolvedSql.Replace(macro.Key, macro.Value);
+                DebugSql = DebugSql.Replace(macro.Key, macro.Value);
+            }
+
+            try
+            {                
                 Debug.Print(DebugSql);
 
                 var stopwatch = Stopwatch.StartNew();
@@ -103,7 +112,9 @@ namespace Dapper.QX
             {                
                 throw new QueryException(exc, ResolvedSql, DebugSql, queryParams);
             }            
-        }
+        }        
+
+        protected virtual async Task<Dictionary<string, string>> ResolveMacrosAsync(IDbConnection connection, IEnumerable<string> macros) => await Task.FromResult(macros.ToDictionary(m => m, m => string.Empty));
 
         private string DebugResolveArrays(string resolvedSql)
         {
@@ -151,7 +162,7 @@ namespace Dapper.QX
         {
             try
             {
-                ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams);
+                ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams, removeMacros: true);
                 return connection.Query(ResolvedSql, queryParams);
             }
             catch (Exception exc)

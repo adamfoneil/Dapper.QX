@@ -11,7 +11,7 @@ namespace Testing
         {
             var query = new TypicalQuery();
             var sql = QueryHelper.ResolveSql(query.Sql, query);
-            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable]  ORDER BY [FirstName]"));
+            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable]  <<macro>> ORDER BY [FirstName]"));
         }
 
         [TestMethod]
@@ -19,7 +19,7 @@ namespace Testing
         {
             var query = new TypicalQuery() { FirstNameLike = "arxo" };
             var sql = QueryHelper.ResolveSql(query.Sql, query);
-            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [FirstName] LIKE '%'+@firstNameLike+'%' ORDER BY [FirstName]"));
+            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [FirstName] LIKE '%'+@firstNameLike+'%' <<macro>> ORDER BY [FirstName]"));
         }
 
         [TestMethod]
@@ -68,7 +68,7 @@ namespace Testing
             var qry = new TypicalQuery();
             qry.PageNumber = 10;
             var sql = qry.ResolveSql(newPageSize: 5);
-            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable]  ORDER BY [FirstName] OFFSET 50 ROWS FETCH NEXT 5 ROWS ONLY"));
+            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable]  <<macro>> ORDER BY [FirstName] OFFSET 50 ROWS FETCH NEXT 5 ROWS ONLY"));
         }
 
         [TestMethod]
@@ -77,7 +77,7 @@ namespace Testing
             var qry = new TypicalQuery();
             qry.PageNumber = 10;
             var sql = qry.ResolveSql();
-            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable]  ORDER BY [FirstName] OFFSET 200 ROWS FETCH NEXT 20 ROWS ONLY"));
+            Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable]  <<macro>> ORDER BY [FirstName] OFFSET 200 ROWS FETCH NEXT 20 ROWS ONLY"));
         }
     }
 }

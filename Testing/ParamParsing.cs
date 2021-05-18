@@ -80,5 +80,39 @@ namespace Testing
                 "@klaksod", "@horgunz", "@hoopsenfargle", "@zahbenlious", "@craybentanz"
             }));
         }
+
+        [TestMethod]
+        public void FindMacros()
+        {
+            var sql = $@"DECLARE @folders TABLE (                
+                [Id] bigint NOT NULL,
+                [FullPath] nvarchar(max) NOT NULL                
+            );
+
+            INSERT INTO @folders ([Id], [FullPath])
+            SELECT [Id], [FullPath]
+            FROM [dbo].[FnUserFolders](@customerId, @userId);
+
+            WITH [folderTree] AS (
+                SELECT [ParentId], [Id], [FullPath]
+                FROM @folders
+                WHERE [Id]=@rootFolderId
+                UNION ALL
+                SELECT [child].[ParentId], [child].[Id], [child].[FullPath]
+                FROM @folders [child] INNER JOIN [folderTree] ON [child].[ParentId]=[folderTree].[Id]        
+            ) SELECT
+                [doc].*, [tree].[FullPath]
+            FROM 
+                [dbo].[Document] [doc] 
+                INNER JOIN [dbo].[DocumentFolder] [df] ON [doc].[Id]=[df].[DocumentId]
+                INNER JOIN [folderTree] ON COALESCE([df].[FolderId], @customerId * -1) = [folderTree].[Id]
+            WHERE
+                [doc].[CustomerId]=@customerId {{andWhere}} <<fields>>
+            ORDER BY 
+                {{orderBy}} {{offset}}";
+
+            var macros = RegexHelper.ParseMacros(sql);
+            Assert.IsTrue(macros.SequenceEqual(new string[] { "<<fields>>" }));
+        }
     }
 }

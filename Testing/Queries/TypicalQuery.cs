@@ -18,7 +18,7 @@ namespace Testing.Queries
 
     public class TypicalQuery : Query<TypicalQueryResult>, ITestableQuery, ISelfModifyingQuery
     {
-        public TypicalQuery() : base("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] {where} %removethis% ORDER BY [FirstName] {offset}")
+        public TypicalQuery() : base("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] {where} **removethis** <<macro>> ORDER BY [FirstName] {offset}")
         {
         }
 
@@ -46,7 +46,7 @@ namespace Testing.Queries
         /// <summary>
         /// not a practical example, but demonstrates how query can be "self-modified" when run
         /// </summary>
-        public string BuildSql(string rawSql) => rawSql.Replace("%removethis% ", string.Empty);
+        public string BuildSql(string rawSql) => rawSql.Replace("**removethis** ", string.Empty);
         
         public IEnumerable<ITestableQuery> GetTestCases()
         {

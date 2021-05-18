@@ -54,7 +54,7 @@ namespace Dapper.QX
 
         private DapperResult<T> ExecuteInner<T>(Func<string, object, DapperResult<T>> dapperMethod, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
         {
-            ResolveSql(out DynamicParameters queryParams, setParams, newPageSize);
+            ResolveSql(out DynamicParameters queryParams, setParams, newPageSize, removeMacros: true);
 
             try
             {

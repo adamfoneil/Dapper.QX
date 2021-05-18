@@ -17,12 +17,12 @@ namespace Dapper.QX
         public const string AndWhereToken = "{andWhere}";
         public const string OffsetToken = "{offset}";
 
-        public static string ResolveSql(string sql, object parameters, int newPageSize = 0)
+        public static string ResolveSql(string sql, object parameters, int newPageSize = 0, bool removeMacros = false)
         {
-            return ResolveSql(sql, parameters, out _, newPageSize);
+            return ResolveSql(sql, parameters, out _, newPageSize, removeMacros);
         }
 
-        public static string ResolveSql(string sql, object parameters, out DynamicParameters dynamicParams, int newPageSize = 0)
+        public static string ResolveSql(string sql, object parameters, out DynamicParameters dynamicParams, int newPageSize = 0, bool removeMacros = false)
         {
             if (sql is null)
             {
@@ -48,6 +48,13 @@ namespace Dapper.QX
             result = ResolveInjectedCriteria(result, paramInfo, properties, parameters, dynamicParams);
             result = ResolveOffset(result, parameters, newPageSize);
             result = RegexHelper.RemovePlaceholders(result);
+
+            // normally you would not remove macros because you had a reason for putting them there initially.
+            // the only reason for this is to make tests work
+            if (removeMacros)
+            {
+                result = RegexHelper.RemoveMacros(result);
+            }
 
             return result.Trim();
         }
@@ -285,6 +292,6 @@ namespace Dapper.QX
                 allParams.Contains(pi.Name.ToLower()));
 
             return queryProps;
-        }
+        }      
     }
 }
