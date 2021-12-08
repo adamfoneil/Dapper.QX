@@ -63,14 +63,14 @@ namespace Dapper.QX
         {
             string result = sql;
 
-            if (sql.ContainsAnyOf(new string[] { WhereToken, AndWhereToken }, out string token))
+            Dictionary<string, string> keywordOptions = new Dictionary<string, string>()
             {
-                Dictionary<string, string> keywordOptions = new Dictionary<string, string>()
-                {
-                    { WhereToken, "WHERE" },
-                    { AndWhereToken, "AND" }
-                };
+                { WhereToken, "WHERE" },
+                { AndWhereToken, "AND" }
+            };
 
+            while (result.ContainsAnyOf(new string[] { WhereToken, AndWhereToken }, out string token))
+            {
                 result = result.Replace(token, (terms?.Any() ?? false) ?
                     $"{keywordOptions[token]} {string.Join(" AND ", terms)}" :
                     string.Empty);

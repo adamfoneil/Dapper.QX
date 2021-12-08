@@ -23,6 +23,17 @@ namespace Testing
         }
 
         [TestMethod]
+        public void UnionQuery()
+        {
+            var query = new UnionQuery() { SomethingId = 12 };
+            var sql = QueryHelper.ResolveSql(query.Sql, query);
+            Assert.IsTrue(sql.Equals(
+            @"SELECT [This] FROM [That] WHERE [SomethingId]=@somethingId ORDER BY [Whatever]
+            UNION
+            SELECT [That] FROM [This] [Whatever]='bingo' AND [SomethingId]=@somethingId ORDER BY [Another]"));
+        }
+
+        [TestMethod]
         public void QueryNullWhenSame()
         {
             var qry1 = new NullWhenQuery();
