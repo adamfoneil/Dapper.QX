@@ -1,5 +1,6 @@
 ﻿using Dapper.QX;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using Testing.Queries;
 
 namespace Testing
@@ -89,6 +90,31 @@ namespace Testing
             qry.PageNumber = 10;
             var sql = qry.ResolveSql();
             Assert.IsTrue(sql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable]  <<macro>> ORDER BY [FirstName] OFFSET 200 ROWS FETCH NEXT 20 ROWS ONLY"));
+        }
+
+        [TestMethod]
+        public void DualScopeQuery()
+        {
+            var qry = new DualScopeQuery();
+            qry.StartDate = new DateTime(2022, 3, 31);
+
+            var sql = qry.ResolveSql();
+            Assert.IsTrue(sql.Equals(@"SELECT
+                [ProjectID], [ProjectInfo], [Units], 
+                SUM(BillableQty) AS [TotalBillableQty], SUM([Quantity]) AS [TotalQty], SUM([ExpenseDollars]) AS [TotalExpenseDollars], 
+                SUM([BillableDollars]) AS [TotalBillableDollars], [prj-totals].[ProjectExpenseAmount] 
+            FROM
+                (SELECT [wr].* FROM [aw].[AllWorkRecords] [wr] WHERE [ThatDate]>=@startDate) AS [source]
+                LEFT JOIN (
+                    SELECT [ProjectID], SUM([Amount]) AS [ProjectExpenseAmount]
+                    FROM [aw].[ProjectExpense]
+                    WHERE 1=1 AND [ThisDate]>=@startDate
+                    GROUP BY [ProjectID]
+                ) [prj-totals] ON [source].[ProjectID]=[prj-totals].[ProjectID]
+            GROUP BY
+                [ProjectID], [ProjectInfo], [Units] 
+            ORDER BY 
+                [ProjectID], [ProjectInfo], [Units]"));
         }
     }
 }

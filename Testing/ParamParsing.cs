@@ -114,5 +114,55 @@ namespace Testing
             var macros = RegexHelper.ParseMacros(sql);
             Assert.IsTrue(macros.SequenceEqual(new string[] { "<<fields>>" }));
         }
+
+        [TestMethod]
+        public void GetWhereScopes1()
+        {
+            var sql = 
+                @"SELECT
+                    [ProjectID], [ProjectInfo], [Units], 
+                    SUM(BillableQty) AS [TotalBillableQty], SUM([Quantity]) AS [TotalQty], SUM([ExpenseDollars]) AS [TotalExpenseDollars], 
+                    SUM([BillableDollars]) AS [TotalBillableDollars], [prj-totals].[ProjectExpenseAmount] 
+                FROM
+                    (SELECT [wr].* FROM [aw].[AllWorkRecords] [wr] {where}) AS [source]
+                    LEFT JOIN (
+                        SELECT [ProjectID], SUM([Amount]) AS [ProjectExpenseAmount]
+                        FROM [aw].[ProjectExpense]
+                        {prj:where}
+                        GROUP BY [ProjectID]
+                    ) [prj-totals] ON [source].[ProjectID]=[prj-totals].[ProjectID]
+                GROUP BY
+                    [ProjectID], [ProjectInfo], [Units] 
+                ORDER BY 
+                    [ProjectID], [ProjectInfo], [Units]";
+
+            var scopes = RegexHelper.GetWhereScopes(sql);
+            Assert.IsTrue(scopes.SequenceEqual(new[] { "global", "prj" }));
+        }
+
+        [TestMethod]
+        public void GetWhereScopes2()
+        {
+            var sql =
+                @"SELECT
+                    [ProjectID], [ProjectInfo], [Units], 
+                    SUM(BillableQty) AS [TotalBillableQty], SUM([Quantity]) AS [TotalQty], SUM([ExpenseDollars]) AS [TotalExpenseDollars], 
+                    SUM([BillableDollars]) AS [TotalBillableDollars], [prj-totals].[ProjectExpenseAmount] 
+                FROM
+                    (SELECT [wr].* FROM [aw].[AllWorkRecords] [wr] {where}) AS [source]
+                    LEFT JOIN (
+                        SELECT [ProjectID], SUM([Amount]) AS [ProjectExpenseAmount]
+                        FROM [aw].[ProjectExpense]
+                        WHERE 1=1 {prj:andWhere}
+                        GROUP BY [ProjectID]
+                    ) [prj-totals] ON [source].[ProjectID]=[prj-totals].[ProjectID]
+                GROUP BY
+                    [ProjectID], [ProjectInfo], [Units] 
+                ORDER BY 
+                    [ProjectID], [ProjectInfo], [Units]";
+
+            var scopes = RegexHelper.GetWhereScopes(sql);
+            Assert.IsTrue(scopes.SequenceEqual(new[] { "global", "prj" }));
+        }
     }
 }

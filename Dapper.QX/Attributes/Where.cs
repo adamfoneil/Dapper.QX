@@ -5,14 +5,24 @@ namespace Dapper.QX.Attributes
     /// <summary>
     /// Defines a WHERE clause expression that is appended to a query
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public class WhereAttribute : Attribute
     {
-        public WhereAttribute(string expression)
+        public const string WhereGlobalScope = "global";
+
+        public WhereAttribute(string scope, string expression)
         {
+            Scope = scope;
             Expression = expression;
         }
 
+        public WhereAttribute(string expression)
+        {
+            Scope = WhereGlobalScope;
+            Expression = expression;
+        }
+
+        public string Scope { get; }
         public string Expression { get; }
 
         /// <summary>
