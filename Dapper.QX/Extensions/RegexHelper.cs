@@ -1,5 +1,4 @@
-﻿using Dapper.QX.Attributes;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -90,7 +89,7 @@ namespace Dapper.QX.Extensions
 
         public static IEnumerable<string> GetWhereScopes(string sql)
         {
-            List<string> results = new List<string>() { WhereAttribute.WhereGlobalScope };
+            List<string> results = new List<string>() { QueryHelper.GlobalScope };
 
             foreach (var token in new[] { "where", "andWhere"})
             {

@@ -7,19 +7,15 @@ namespace Dapper.QX.Attributes
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public class WhereAttribute : Attribute
-    {
-        public const string WhereGlobalScope = "global";
-
+    {        
         public WhereAttribute(string scope, string expression)
         {
             Scope = scope;
             Expression = expression;
         }
 
-        public WhereAttribute(string expression)
-        {
-            Scope = WhereGlobalScope;
-            Expression = expression;
+        public WhereAttribute(string expression) : this(QueryHelper.GlobalScope, expression)
+        {                        
         }
 
         public string Scope { get; }

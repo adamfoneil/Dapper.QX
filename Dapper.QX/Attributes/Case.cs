@@ -8,11 +8,18 @@ namespace Dapper.QX.Attributes
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public class CaseAttribute : Attribute
     {
-        public CaseAttribute(object value, string expression)
+        public CaseAttribute(string scope, object value, string expression)
         {
             Value = value;
             Expression = expression;
+            Scope = scope;
         }
+
+        public CaseAttribute(object value, string expression) : this(QueryHelper.GlobalScope, value, expression)
+        {            
+        }
+
+        public string Scope { get; }
 
         public object Value { get; }
 
