@@ -11,11 +11,16 @@ namespace Dapper.QX
 {
     public static partial class QueryHelper
     {
+        private const string WhereInner = "where";
+        private const string AndWhereInner = "andWhere";
+
         public const string OrderByToken = "{orderBy}";
         public const string JoinToken = "{join}";
-        public const string WhereToken = "{where}";
-        public const string AndWhereToken = "{andWhere}";
+        public const string WhereToken = "{" + WhereInner + "}";
+        public const string AndWhereToken = "{" + AndWhereInner + "}";
         public const string OffsetToken = "{offset}";
+
+        public const string GlobalScope = "global";
 
         public static string ResolveSql(string sql, object parameters, int newPageSize = 0, bool removeMacros = false)
         {
@@ -57,27 +62,7 @@ namespace Dapper.QX
             }
 
             return result.Trim();
-        }
-
-        public static string ResolveInjectedCriteria(string sql, IEnumerable<string> terms)
-        {
-            string result = sql;
-
-            Dictionary<string, string> keywordOptions = new Dictionary<string, string>()
-            {
-                { WhereToken, "WHERE" },
-                { AndWhereToken, "AND" }
-            };
-
-            while (result.ContainsAnyOf(new string[] { WhereToken, AndWhereToken }, out string token))
-            {
-                result = result.Replace(token, (terms?.Any() ?? false) ?
-                    $"{keywordOptions[token]} {string.Join(" AND ", terms)}" :
-                    string.Empty);
-            }
-
-            return result;
-        }
+        }        
 
         private static string ResolveOffset(string sql, object parameters, int newPageSize = 0)
         {
@@ -105,31 +90,77 @@ namespace Dapper.QX
             return false;
         }
 
-        private static string ResolveInjectedCriteria(string sql, QueryParameters paramInfo, IEnumerable<PropertyInfo> properties, object parameters, DynamicParameters queryParams)
+        private static string ResolveInjectedCriteria(string sql, QueryParameters paramInfo, 
+            IEnumerable<PropertyInfo> properties, object parameters, DynamicParameters queryParams)
         {
-            List<string> terms = new List<string>();
+            var result = sql;
+            var whereScopes = RegexHelper.GetWhereScopes(sql);
 
-            foreach (var pi in properties)
-            {
-                if (HasValue(pi, parameters, out object value) && paramInfo.IsOptional(pi))
+            // not supporting scoped phrase queries, so we have a marker that lets them be used once only
+            bool usedPhraseAlready = false; 
+
+            var propertiesWithValues = properties
+                .Where(pi => paramInfo.IsOptional(pi) && HasValue(pi, parameters, out _))
+                .Select(pi => new
                 {
-                    if (GetCaseExpression(pi, value, out string caseExpression))
+                    PropertyInfo = pi,
+                    Value = pi.GetValue(parameters)
+                });
+
+            foreach (var scope in whereScopes)
+            {
+                var terms = new List<string>();
+                foreach (var p in propertiesWithValues)
+                {                    
+                    if (GetCaseExpression(scope, p.PropertyInfo, p.Value, out string caseExpression))
                     {
                         terms.Add(caseExpression);
                     }
-                    else if (GetWhereExpression(pi, out string whereExpression))
+                    else if (GetWhereExpression(scope, p.PropertyInfo, out string whereExpression))
                     {
                         terms.Add(whereExpression);
                     }
-                    else if (GetPhraseQuery(pi, value, out PhraseQuery phraseQuery))
+                    else if (GetPhraseQuery(p.PropertyInfo, p.Value, out PhraseQuery phraseQuery) && !usedPhraseAlready)
                     {
                         queryParams.AddDynamicParams(phraseQuery.Parameters);
                         terms.Add(phraseQuery.Expression);
-                    }
+                        usedPhraseAlready = true;
+                    }                    
                 }
+
+                result = ResolveInjectedCriteria(result, scope, terms);
             }
 
-            return ResolveInjectedCriteria(sql, terms);
+            return result;
+        }
+
+        public static string ResolveInjectedCriteria(string sql, string scope, IEnumerable<string> terms)
+        {
+            var result = sql;
+
+            // global scope has no prefix
+            var insertScope = (scope.Equals(GlobalScope)) ? string.Empty : scope + ":";
+
+            var tokens = new string[] 
+            { 
+                "{" + insertScope + WhereInner + "}", 
+                "{" + insertScope + AndWhereInner + "}" 
+            };
+           
+            var keywordOptions = new Dictionary<string, string>()
+            {
+                [tokens[0]] = "WHERE",
+                [tokens[1]] = "AND"
+            };
+
+            while (result.ContainsAnyOf(tokens, out string token))
+            {
+                result = result.Replace(token, (terms?.Any() ?? false) ?
+                    $"{keywordOptions[token]} {string.Join(" AND ", terms)}" :
+                    string.Empty);
+            }
+
+            return result;
         }
 
         private static bool GetPhraseQuery(PropertyInfo pi, object value, out PhraseQuery phraseQuery)
@@ -145,9 +176,9 @@ namespace Dapper.QX
             return false;
         }
 
-        private static bool GetWhereExpression(PropertyInfo pi, out string whereExpression)
+        private static bool GetWhereExpression(string scope, PropertyInfo pi, out string whereExpression)
         {
-            WhereAttribute whereAttr = pi.GetAttribute<WhereAttribute>();
+            WhereAttribute whereAttr = pi.GetCustomAttributes<WhereAttribute>().SingleOrDefault(attr => attr.Scope.Equals(scope));
             if (whereAttr != null)
             {
                 whereExpression = whereAttr.Expression;
@@ -158,9 +189,9 @@ namespace Dapper.QX
             return false;
         }
 
-        private static bool GetCaseExpression(PropertyInfo pi, object value, out string caseExpression)
+        private static bool GetCaseExpression(string scope, PropertyInfo pi, object value, out string caseExpression)
         {
-            var cases = pi.GetCustomAttributes(typeof(CaseAttribute), false).OfType<CaseAttribute>();
+            var cases = pi.GetCustomAttributes(typeof(CaseAttribute), false).OfType<CaseAttribute>().Where(attr => attr.Scope.Equals(scope));
             var selectedCase = cases?.FirstOrDefault(c => c.Value.Equals(value));
             if (selectedCase != null)
             {

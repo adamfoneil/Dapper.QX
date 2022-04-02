@@ -86,6 +86,24 @@ namespace Dapper.QX.Extensions
             foreach (var opt in optional) result = result.Replace(opt.Token, string.Empty);
             return result;
         }
+
+        public static IEnumerable<string> GetWhereScopes(string sql)
+        {
+            List<string> results = new List<string>() { QueryHelper.GlobalScope };
+
+            foreach (var token in new[] { "where", "andWhere"})
+            {
+                var whereScopes = Regex
+                    .Matches(sql, @"\{(?<scope>([a-z]*)):" + token + @"\}")
+                    .OfType<Match>()
+                    .Select(m => m.Groups["scope"].Value)
+                    .ToArray();
+
+                results.AddRange(whereScopes);
+            }            
+
+            return results.Distinct();
+        }
     }
 
     public class QueryParameters
@@ -93,20 +111,11 @@ namespace Dapper.QX.Extensions
         public string[] Required { get; set; }
         public OptionalToken[] Optional { get; set; }
 
-        public bool IsOptional(PropertyInfo pi)
-        {
-            return !IsRequired(pi);
-        }
+        public bool IsOptional(PropertyInfo pi) => !IsRequired(pi);
 
-        public bool IsRequired(PropertyInfo pi)
-        {
-            return Required.Select(p => p.ToLower()).Contains(pi.Name.ToLower());
-        }
+        public bool IsRequired(PropertyInfo pi) => Required.Select(p => p.ToLower()).Contains(pi.Name.ToLower());
 
-        public IEnumerable<string> AllParamNames()
-        {
-            return Required.Concat(Optional.SelectMany(o => o.ParameterNames)).Distinct();
-        }
+        public IEnumerable<string> AllParamNames() => Required.Concat(Optional.SelectMany(o => o.ParameterNames)).Distinct();
     }
 
     public class OptionalToken
