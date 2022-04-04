@@ -3,9 +3,6 @@ using Dapper;
 using Dapper.QX;
 using Dapper.QX.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SqlIntegration.Library;
-using SqlIntegration.Library.Classes;
-using SqlIntegration.Library.Extensions;
 using SqlServer.LocalDb;
 using SqlServer.LocalDb.Models;
 using System;
@@ -15,6 +12,9 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using Testing.Queries;
+using Dapper.QX.Extensions;
+using SqlIntegration.Library;
+using SqlIntegration.Library.Classes;
 
 namespace Testing
 {
@@ -43,7 +43,7 @@ namespace Testing
                     if (cn.State == ConnectionState.Closed) cn.Open();
 
                     var dataTable = results.ToDataTable();
-                    BulkInsert.ExecuteAsync(dataTable, cn as SqlConnection, DbObject.Parse("dbo.SampleTable"), 50, new BulkInsertOptions()
+                    BulkInsert.ExecuteAsync(dataTable, cn, DbObject.Parse("dbo.SampleTable"), 50, new BulkInsertOptions()
                     {
                         SkipIdentityColumn = "Id"
                     }).Wait();
@@ -230,6 +230,63 @@ namespace Testing
                 SET @MinDate = '1/15/2020 12:00:00 AM';
 
                 SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [Weight]>=@minWeight AND [Weight]<=@maxWeight AND [FirstName] LIKE '%'+@firstNameLike+'%' AND [SomeDate]>=@minDate  ORDER BY [FirstName]".ReplaceWhitespace()));      
+        }
+
+        [TestMethod]
+        public void SimpleTvp()
+        {
+            var qry = new SimpleTvpExample() { Source = new int[] { 1, 2, 3 }.ToDataTable() };
+
+            using (var cn = LocalDb.GetConnection(dbName))
+            {
+                try
+                {
+                    cn.Execute("CREATE TYPE [IdList] AS TABLE ([Id] int NOT NULL PRIMARY KEY)");
+                }
+                catch 
+                {
+                    // do nothing                    
+                }
+
+                var results = qry.Execute(cn);
+                Assert.IsTrue(results.SequenceEqual(new int[] { 1, 2, 3 }));
+            }
+        }
+
+        [TestMethod]
+        public void MoreComplexTvp()
+        {
+            var data = new[]
+            {
+                new PersonResult() { FirstName = "Waldo", LastName = "Where Is", DateOfBirth = new DateTime(1990, 1, 1), Id = 432 },
+                new PersonResult() { FirstName = "Jenny", LastName = "Anybody", DateOfBirth = new DateTime(1980, 1, 1), Id = 184 },
+            };
+
+            var qry = new MoreComplexTvpExample()
+            {
+                Source = data.ToDataTable()
+            };
+
+            using (var cn = LocalDb.GetConnection(dbName))
+            {
+                try
+                {
+                    cn.Execute(
+                        @"CREATE TYPE [dbo].[PersonInfo] AS TABLE (
+                            [FirstName] nvarchar(50) NOT NULL, 
+                            [LastName] nvarchar(50) NOT NULL,
+                            [DateOfBirth] datetime NULL,
+                            [Id] int NOT NULL
+                        )");
+                }
+                catch 
+                {
+                    // do nothing
+                }
+
+                var results = qry.Execute(cn);
+                Assert.IsTrue(results.Select(row => row.Id).SequenceEqual(data.Select(row => row.Id)));
+            }
         }
     }
 }
