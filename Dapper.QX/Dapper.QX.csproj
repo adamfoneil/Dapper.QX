@@ -12,7 +12,7 @@
     <PackageProjectUrl>https://github.com/adamosoftware/Dapper.QX</PackageProjectUrl>
     <RepositoryUrl>https://github.com/adamosoftware/Dapper.QX</RepositoryUrl>
     <PackageTags>dapper inline-sql</PackageTags>
-    <PackageReleaseNotes>added ToDataTable extension method, for table value parameter support</PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/adamfoneil/Dapper.QX/issues/25</PackageReleaseNotes>
 	<IncludeSymbols>true</IncludeSymbols>
 	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
