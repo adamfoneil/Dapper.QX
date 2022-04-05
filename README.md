@@ -92,6 +92,28 @@ public class QueryTests
     public void MyQuery() => QueryHelper.Test<MyQuery>(GetConnection);    
 }
 ```
+## Table-Valued Parameters
+To pass a TVP, create public property on your query class of type `DataTable` and add the `[TableType]` attribute with the name of the UDT in SQL Server it maps to. In this example, `Source` is the TVP property:
+```csharp
+internal class SimpleTvpExample : Query<int>
+{
+    public SimpleTvpExample() : base(
+        @"DECLARE @list [IdList];
+        INSERT INTO @list ([Id]) SELECT [Id] FROM @source;
+        SELECT [Id] FROM @list")
+    {
+    }
+
+    [TableType("[dbo].[IdList]")]
+    public DataTable Source { get; set; }
+}
+```
+Set the `Source` property like any other parameter. You can create a `DataTable` dynamically with the [ToDataTable](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Extensions/EnumerableExtensions.cs#L17) extension method, as in the [test](https://github.com/adamfoneil/Dapper.QX/blob/master/Testing/ExecutionSqlServer.cs#L238):
+
+```csharp
+var qry = new SimpleTvpExample() { Source = new int[] { 1, 2, 3 }.ToDataTable() };
+```
+
 ## Debugging
 To help you debug resolved SQL, place a breakpoint on any of the `Execute*` calls, and step over that line. Look in the Debug Output window to see the resolved SQL along with any parameter declarations. You can paste this directly into SSMS and execute.
 
