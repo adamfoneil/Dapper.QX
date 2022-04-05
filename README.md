@@ -114,6 +114,9 @@ Set the `Source` property like any other parameter. You can create a `DataTable`
 var qry = new SimpleTvpExample() { Source = new int[] { 1, 2, 3 }.ToDataTable() };
 ```
 
+## Multiple WHERE clauses
+You can inject multiple WHERE clauses in a query by adding a prefix on the **{where}** and **{andWhere}** tokens, making them like **{_prefix_:where}** or **{_prefix_:andWhere}**. See [issue 24](https://github.com/adamfoneil/Dapper.QX/issues/24) for more info.
+
 ## Debugging
 To help you debug resolved SQL, place a breakpoint on any of the `Execute*` calls, and step over that line. Look in the Debug Output window to see the resolved SQL along with any parameter declarations. You can paste this directly into SSMS and execute.
 
@@ -121,5 +124,5 @@ To help you debug resolved SQL, place a breakpoint on any of the `Execute*` call
 
 Note the extra indent you're seeing in the SQL is because of whitespace in the sample query's [source file](https://github.com/adamosoftware/Ginseng8/blob/dapper-qx/Ginseng8.Mvc/Queries/OpenWorkItems.cs#L218) from where I took this screenshot. In the source file, the SQL is stored with a verbatim string, so the indent is preserved.
 
-----
-Please see also my Crud library [Dapper.CX](https://github.com/adamosoftware/Dapper.CX), Dapper.QX's companion library.
+Note also at this time, TVPs are not included in the debug output.
+
