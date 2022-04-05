@@ -4,6 +4,7 @@ using Dapper.QX.Extensions;
 using Dapper.QX.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 
@@ -217,7 +218,7 @@ namespace Dapper.QX
             if (sql.Contains(OrderByToken))
             {
                 var orderByProp = parameters.GetType().GetProperties()
-                   .FirstOrDefault(pi => pi.HasAttribute<OrderByAttribute>() && HasValue(pi, parameters));
+                   .FirstOrDefault(pi => pi.HasAttribute<OrderByAttribute>() && HasValue(pi, parameters, out _));
 
                 if (orderByProp == null)
                 {
@@ -267,7 +268,7 @@ namespace Dapper.QX
                      PropertyInfo = pi
                  }).ToDictionary(row => row.Name, row => row.PropertyInfo);
 
-            return parameterNames.All(p => paramPropertyMap.ContainsKey(p.ToLower()) && HasValue(paramPropertyMap[p.ToLower()], parameters));
+            return parameterNames.All(p => paramPropertyMap.ContainsKey(p.ToLower()) && HasValue(paramPropertyMap[p.ToLower()], parameters, out _));
         }
 
         private static bool HasValue(PropertyInfo propertyInfo, object @object, out object value)
@@ -286,21 +287,35 @@ namespace Dapper.QX
             }
 
             return false;
-        }
-
-        private static bool HasValue(PropertyInfo propertyInfo, object @object)
-        {
-            return HasValue(propertyInfo, @object, out object value);
-        }
+        }        
 
         private static DynamicParameters GetDynamicParameters(IEnumerable<PropertyInfo> properties, object parameters)
         {
             var result = new DynamicParameters();
+
             foreach (var prop in properties)
             {
-                if (HasValue(prop, parameters, out object value) && !prop.HasAttribute<PhraseAttribute>()) result.Add(prop.Name, value);
+                if (HasValue(prop, parameters, out object value))
+                {
+                    if (prop.PropertyType.Equals(typeof(DataTable)))
+                    {
+                        var typeName = GetTableTypeName(prop);
+                        result.Add(prop.Name, (value as DataTable).AsTableValuedParameter(typeName));
+                    }
+                    else if (!prop.HasAttribute<PhraseAttribute>())
+                    {
+                        result.Add(prop.Name, value);
+                    }
+                }
             }
+
             return result;
+
+            string GetTableTypeName(PropertyInfo prop)
+            {
+                var attr = prop.GetCustomAttribute<TableType>();
+                return (attr != null) ? attr.TypeName : throw new Exception("DataTable properties require a [TableType] parameter.");                
+            }
         }
 
         /// <summary>
