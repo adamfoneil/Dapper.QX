@@ -92,6 +92,31 @@ public class QueryTests
     public void MyQuery() => QueryHelper.Test<MyQuery>(GetConnection);    
 }
 ```
+## Table-Valued Parameters
+To pass a TVP, create public property on your query class of type `DataTable` and add the `[TableType]` attribute with the name of the UDT in SQL Server it maps to. In this example, `Source` is the TVP property:
+```csharp
+internal class SimpleTvpExample : Query<int>
+{
+    public SimpleTvpExample() : base(
+        @"DECLARE @list [IdList];
+        INSERT INTO @list ([Id]) SELECT [Id] FROM @source;
+        SELECT [Id] FROM @list")
+    {
+    }
+
+    [TableType("[dbo].[IdList]")]
+    public DataTable Source { get; set; }
+}
+```
+Set the `Source` property like any other parameter. You can create a `DataTable` dynamically with the [ToDataTable](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Extensions/EnumerableExtensions.cs#L17) extension method, as in the [test](https://github.com/adamfoneil/Dapper.QX/blob/master/Testing/ExecutionSqlServer.cs#L238):
+
+```csharp
+var qry = new SimpleTvpExample() { Source = new int[] { 1, 2, 3 }.ToDataTable() };
+```
+
+## Multiple WHERE clauses
+You can inject multiple WHERE clauses in a query by adding a prefix on the **{where}** and **{andWhere}** tokens, making them like **{_prefix_:where}** or **{_prefix_:andWhere}**. See [issue 24](https://github.com/adamfoneil/Dapper.QX/issues/24) for more info.
+
 ## Debugging
 To help you debug resolved SQL, place a breakpoint on any of the `Execute*` calls, and step over that line. Look in the Debug Output window to see the resolved SQL along with any parameter declarations. You can paste this directly into SSMS and execute.
 
@@ -99,5 +124,5 @@ To help you debug resolved SQL, place a breakpoint on any of the `Execute*` call
 
 Note the extra indent you're seeing in the SQL is because of whitespace in the sample query's [source file](https://github.com/adamosoftware/Ginseng8/blob/dapper-qx/Ginseng8.Mvc/Queries/OpenWorkItems.cs#L218) from where I took this screenshot. In the source file, the SQL is stored with a verbatim string, so the indent is preserved.
 
-----
-Please see also my Crud library [Dapper.CX](https://github.com/adamosoftware/Dapper.CX), Dapper.QX's companion library.
+Note also at this time, TVPs are not included in the debug output.
+
