@@ -49,13 +49,6 @@ namespace Dapper.QX.Extensions
             return dataTable;
         }
         
-        public static SqlMapper.ICustomQueryParameter AsTableValuedParameter<T>(this IEnumerable<T> enumerable, string typeName)
-        {
-            var dataTable = enumerable.ToDataTable();
-
-            return dataTable.AsTableValuedParameter(typeName);
-        }
-
         internal static bool IsSimpleType(this Type type) => type.Equals(typeof(string)) || type.IsValueType;
 
         internal static bool IsNullableGeneric(this Type type) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
