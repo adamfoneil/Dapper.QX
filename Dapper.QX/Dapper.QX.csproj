@@ -26,11 +26,11 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+    <None Include="..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.0.30" />
-    <None Include="..\README.md" Pack="true" PackagePath="\"/>
+    <PackageReference Include="Dapper" Version="2.0.30" />    
   </ItemGroup>
 
 </Project>
