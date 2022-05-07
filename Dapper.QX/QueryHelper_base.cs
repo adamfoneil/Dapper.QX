@@ -20,6 +20,7 @@ namespace Dapper.QX
         public const string WhereToken = "{" + WhereInner + "}";
         public const string AndWhereToken = "{" + AndWhereInner + "}";
         public const string OffsetToken = "{offset}";
+        public const string TopToken = "{top}";
 
         public const string GlobalScope = "global";
 
@@ -50,6 +51,7 @@ namespace Dapper.QX
 
             result = ResolveInlineOptionalCriteria(result, parameters, paramInfo);
             result = ResolveOrderBy(result, parameters, queryTypeName);
+            result = ResolveTopClause(result, parameters, dynamicParams);
             result = ResolveOptionalJoins(result, parameters);
             result = ResolveInjectedCriteria(result, paramInfo, properties, parameters, dynamicParams);
             result = ResolveOffset(result, parameters, newPageSize);
@@ -63,7 +65,7 @@ namespace Dapper.QX
             }
 
             return result.Trim();
-        }        
+        }
 
         private static string ResolveOffset(string sql, object parameters, int newPageSize = 0)
         {
@@ -211,6 +213,29 @@ namespace Dapper.QX
                .Select(pi => pi.GetAttribute<JoinAttribute>().Sql);
 
             return sql.Replace(JoinToken, string.Join("\r\n", joinTerms));
+        }
+
+        private static string ResolveTopClause(string sql, object parameters, DynamicParameters dynamicParams)
+        {
+            if (sql.Contains(TopToken))
+            {
+                var topProp = parameters.GetType().GetProperties()
+                   .FirstOrDefault(pi => pi.HasAttribute<TopAttribute>() && HasValue(pi, parameters, out _));
+
+                if (topProp is null) return sql;
+
+                var value = topProp.GetValue(parameters);
+
+                if (value != null)
+                {
+                    var expression = $"TOP (@{topProp.Name})";
+
+                    sql = sql.Replace(TopToken, expression);
+                    dynamicParams.Add(topProp.Name, value);
+                }                
+            }
+
+            return sql;
         }
 
         private static string ResolveOrderBy(string sql, object parameters, string typeName)

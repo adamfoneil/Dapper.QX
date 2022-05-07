@@ -8,9 +8,12 @@ namespace Testing.Queries
 {
     public class TestableQuerySample : TestableQuery<int>
     {
-        public TestableQuerySample() : base("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] {where} ORDER BY [FirstName] {offset}")
+        public TestableQuerySample() : base("SELECT {top} [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] {where} ORDER BY [FirstName] {offset}")
         {
         }
+
+        [Top]
+        public int? LimitRows { get; set; }
 
         [Where("[Weight]>=@minWeight")]
         public decimal? MinWeight { get; set; }

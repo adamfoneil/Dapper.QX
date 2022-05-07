@@ -18,9 +18,12 @@ namespace Testing.Queries
 
     public class TypicalQuery : Query<TypicalQueryResult>, ITestableQuery, ISelfModifyingQuery
     {
-        public TypicalQuery() : base("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] {where} **removethis** <<macro>> ORDER BY [FirstName] {offset}")
+        public TypicalQuery() : base("SELECT {top} [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] {where} **removethis** <<macro>> ORDER BY [FirstName] {offset}")
         {
         }
+
+        [Top]
+        public int? Top { get; set; }
 
         [Where("[Weight]>=@minWeight")]
         public decimal? MinWeight { get; set; }
@@ -57,6 +60,7 @@ namespace Testing.Queries
             yield return new TypicalQuery() { MaxDate = new DateTime(2019, 1, 1) };
             yield return new TypicalQuery() { NotesContain = "this that -whatever" };
             yield return new TypicalQuery() { PageNumber = 3 };
+            yield return new TypicalQuery() { Top = 10 };
         }
 
         public IEnumerable<dynamic> TestExecute(IDbConnection connection)
