@@ -85,6 +85,8 @@ namespace Dapper.QX
             ResolveSql(out DynamicParameters queryParams, setParams, newPageSize);
 
             var macros = RegexHelper.ParseMacros(ResolvedSql);
+
+#if NETSTANDARD2_0
             var macroInserts = await ResolveMacrosAsync(connection, macros);
 
             if (macroInserts.inserts.Any())
@@ -95,8 +97,9 @@ namespace Dapper.QX
                     ResolvedSql = ResolvedSql.Replace(macro.Key, macro.Value);
                     DebugSql = DebugSql.Replace(macro.Key, macro.Value);
                 }
-            }            
-            
+            }
+#endif            
+
             try
             {                
                 Debug.Print(DebugSql);
@@ -117,9 +120,11 @@ namespace Dapper.QX
             {                
                 throw new QueryException(exc, ResolvedSql, DebugSql, queryParams);
             }            
-        }        
+        }
 
+#if NETSTANDARD2_0
         protected virtual async Task<(Dictionary<string, string> inserts, DynamicParameters parameters)> ResolveMacrosAsync(IDbConnection connection, IEnumerable<string> macros) => await Task.FromResult((macros.ToDictionary(m => m, m => string.Empty), new DynamicParameters()));
+#endif
 
         protected virtual async Task OnExecutingAsync(IDbConnection connection, DynamicParameters parameters) => await Task.CompletedTask;
 
