@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Dapper.QX.Net452</id>
+    <version>1.0.33</version>
+    <title>Dapper.QX.Net452</title>
+    <authors>Adam O'Neil</authors>
+    <owners>Adam O'Neil</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/adamfoneil/Dapper.QX</projectUrl>
+    <description>More powerful and testable inline SQL used with Dapper</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright (c) Adam O'Neil 2022</copyright>
+    <tags>dapper inline-sql</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.5.2">
+        <dependency id="Dapper" version="1.60.6" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>

@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Testing", "Testing\Testing.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.QX.Net46", "Dapper.QX.Net46\Dapper.QX.Net46.csproj", "{61A892A1-5FA2-44B7-8219-E6C14390EB1C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.QX.Net452", "Dapper.QX.Net452\Dapper.QX.Net452.csproj", "{F56639F6-11F7-4572-B807-47327F397258}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{61A892A1-5FA2-44B7-8219-E6C14390EB1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61A892A1-5FA2-44B7-8219-E6C14390EB1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61A892A1-5FA2-44B7-8219-E6C14390EB1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F56639F6-11F7-4572-B807-47327F397258}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F56639F6-11F7-4572-B807-47327F397258}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F56639F6-11F7-4572-B807-47327F397258}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F56639F6-11F7-4572-B807-47327F397258}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
