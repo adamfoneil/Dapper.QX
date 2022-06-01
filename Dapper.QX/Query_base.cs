@@ -114,7 +114,10 @@ namespace Dapper.QX
 
                 var qt = new QueryTrace(GetType().Name, ResolvedSql, DebugSql, queryParams, stopwatch.Elapsed);
                 OnQueryExecuted(qt);
+
+#if NETSTANDARD2_0
                 await OnQueryExecutedAsync(connection, qt);
+#endif
                 traces?.Add(qt);
 
                 return result;
