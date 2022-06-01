@@ -105,7 +105,10 @@ namespace Dapper.QX
                 Debug.Print(DebugSql);
 
                 var stopwatch = Stopwatch.StartNew();
+
+#if NETSTANDARD2_0
                 await OnExecutingAsync(connection, queryParams);
+#endif
                 var result = await dapperMethod.Invoke(ResolvedSql, queryParams);
                 stopwatch.Stop();                
 
@@ -124,9 +127,9 @@ namespace Dapper.QX
 
 #if NETSTANDARD2_0
         protected virtual async Task<(Dictionary<string, string> inserts, DynamicParameters parameters)> ResolveMacrosAsync(IDbConnection connection, IEnumerable<string> macros) => await Task.FromResult((macros.ToDictionary(m => m, m => string.Empty), new DynamicParameters()));
-#endif
 
         protected virtual async Task OnExecutingAsync(IDbConnection connection, DynamicParameters parameters) => await Task.CompletedTask;
+#endif
 
         private string DebugResolveArrays(string resolvedSql)
         {
