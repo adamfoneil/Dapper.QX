@@ -21,5 +21,31 @@ namespace Testing
             bool result = items.ContainsAny(new string[] { "wonga", "witchita" });
             Assert.IsFalse(result);
         }
+
+        [TestMethod]
+        public void DataTableWithEnum()
+        {
+            var data = new[]
+            {
+                new MessageInfo() { AppointmentId = 1, MessageId = "whatever", MessageType = MessageType.Email, Recipient = "adamo@nowhere.org" },
+                new MessageInfo() { AppointmentId = 2, MessageId = "another", MessageType = MessageType.Text, Recipient = "223-3439" }
+            }.ToDataTable();
+
+            Assert.IsTrue(data.Columns["MessageType"].DataType.Equals(typeof(int)));
+        }
+
+        private enum MessageType
+        {
+            Email = 1,
+            Text = 2
+        }
+
+        private class MessageInfo
+        {
+            public int AppointmentId { get; set; }
+            public MessageType MessageType { get; set; }
+            public string MessageId { get; set; }
+            public string Recipient { get; set; }
+        }
     }
 }
