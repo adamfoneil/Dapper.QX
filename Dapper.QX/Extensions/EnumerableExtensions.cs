@@ -36,7 +36,10 @@ namespace Dapper.QX.Extensions
                 foreach (string name in properties.Keys)
                 {
                     var propertyType = properties[name].PropertyType;
-                    var columnType = (propertyType.IsNullableGeneric()) ? propertyType.GetGenericArguments()[0] : propertyType;
+                    var columnType = 
+                        (propertyType.IsNullableGeneric()) ? propertyType.GetGenericArguments()[0] : 
+                        (propertyType.IsEnum) ? typeof(int) :
+                        propertyType;
                     dataTable.Columns.Add(name, columnType);
                 }
 
