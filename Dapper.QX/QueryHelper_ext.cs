@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Dapper.QX
@@ -25,7 +26,16 @@ namespace Dapper.QX
             {
                 foreach (var testCase in query.GetTestCases())
                 {
-                    testCase.TestExecute(cn);
+                    try
+                    {
+                        testCase.TestExecute(cn);
+                    }
+                    catch
+                    {
+                        Debug.Print(testCase.ResolvedSql);
+                        throw;
+                    }
+                    
                 }
             }
         }

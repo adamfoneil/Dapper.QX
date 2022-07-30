@@ -11,5 +11,6 @@ namespace Dapper.QX.Interfaces
     {
         IEnumerable<dynamic> TestExecute(IDbConnection connection);
         IEnumerable<ITestableQuery> GetTestCases();
+        string ResolvedSql { get; }
     }
 }

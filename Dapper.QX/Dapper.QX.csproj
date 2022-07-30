@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>1.0.34</Version>
+		<Version>1.0.35</Version>
 		<Authors>Adam O'Neil</Authors>
 		<Product>Dapper.QX</Product>
 		<Description>More powerful and testable inline SQL used with Dapper</Description>
@@ -12,9 +12,10 @@
 		<PackageProjectUrl>https://github.com/adamosoftware/Dapper.QX</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/adamosoftware/Dapper.QX</RepositoryUrl>
 		<PackageTags>dapper inline-sql</PackageTags>
-		<PackageReleaseNotes>enums in table-valued params, https://github.com/adamfoneil/Dapper.QX/issues/27</PackageReleaseNotes>
+		<PackageReleaseNotes>show resolved SQL in Test debug output</PackageReleaseNotes>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -24,6 +25,10 @@
 		<None Include="..\LICENSE">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\README.md">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
 		</None>
 	</ItemGroup>
 

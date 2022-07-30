@@ -32,6 +32,12 @@ namespace Testing.Queries
 
         [Phrase(new string[] { nameof(TypicalQueryResult.Notes) })]
         public string NotesContain { get; set; }
+        
+        /*
+         * used only to see if new Debug output appeared
+        [Where("[MissingColumn]=@brokenParam")]
+        public string BrokenParam { get; set; }
+        */
 
         [Offset(20)]
         public int? PageNumber { get; set; }
@@ -45,6 +51,7 @@ namespace Testing.Queries
             yield return new TestableQuerySample() { MaxDate = new DateTime(2019, 1, 1) };
             yield return new TestableQuerySample() { NotesContain = "this that -whatever" };
             yield return new TestableQuerySample() { PageNumber = 3 };
+            //yield return new TestableQuerySample() { BrokenParam = "whatever" };
         }
     }
 }
