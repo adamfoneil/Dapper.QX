@@ -29,13 +29,13 @@ namespace Dapper.QX
                     try
                     {
                         testCase.TestExecute(cn);
+                        Debug.Print(testCase.ResolvedSql);
                     }
                     catch
                     {
                         Debug.Print(testCase.ResolvedSql);
                         throw;
-                    }
-                    
+                    }                    
                 }
             }
         }
