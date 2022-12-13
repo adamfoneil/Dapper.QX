@@ -1,20 +1,18 @@
 ﻿using AdamOneilSoftware;
 using Dapper;
 using Dapper.QX;
-using Dapper.QX.Models;
+using Dapper.QX.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SqlIntegration.Library;
+using SqlIntegration.Library.Classes;
 using SqlServer.LocalDb;
 using SqlServer.LocalDb.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using Testing.Queries;
-using Dapper.QX.Extensions;
-using SqlIntegration.Library;
-using SqlIntegration.Library.Classes;
 
 namespace Testing
 {
@@ -138,17 +136,6 @@ namespace Testing
                 var results = new TypicalQuery() { PageNumber = 4 }.ExecuteAsync(cn, newPageSize: 10).Result;
                 Debug.Print($"result count = {results.Count()}");
                 Assert.IsTrue(results.Count() == 10);
-            }
-        }
-
-        [TestMethod]
-        public void QueryWithTrace()
-        {
-            using (var cn = LocalDb.GetConnection(dbName))
-            {
-                List<QueryTrace> traces = new List<QueryTrace>();
-                var results = new TypicalQuery().ExecuteAsync(cn, traces: traces).Result;
-                Assert.IsTrue(traces.Count() == 1);
             }
         }
 

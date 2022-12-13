@@ -1,6 +1,7 @@
 ﻿using Dapper.QX.Classes;
 using Dapper.QX.Exceptions;
 using Dapper.QX.Models;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,7 +11,7 @@ namespace Dapper.QX
 {
     public partial class Query<TResult>
     {
-        public IEnumerable<TResult> Execute(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
+        public IEnumerable<TResult> Execute(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
         {
             var result = ExecuteInner(
                 (string sql, object param) =>
@@ -19,12 +20,12 @@ namespace Dapper.QX
                     {
                         Enumerable = connection.Query<TResult>(sql, param, transaction, commandTimeout: commandTimeout, commandType: commandType)
                     };
-                }, traces, setParams, newPageSize);
+                }, logger, setParams, newPageSize);
 
             return result.Enumerable;
         }
 
-        public TResult ExecuteSingle(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
+        public TResult ExecuteSingle(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null)
         {
             var result = ExecuteInner(
                 (string sql, object param) =>
@@ -33,12 +34,12 @@ namespace Dapper.QX
                     {
                         Single = connection.QuerySingle<TResult>(sql, param, transaction, commandTimeout, commandType)
                     };
-                }, traces, setParams);
+                }, logger, setParams);
 
             return result.Single;
         }
 
-        public TResult ExecuteSingleOrDefault(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
+        public TResult ExecuteSingleOrDefault(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null)
         {
             var result = ExecuteInner(
                 (string sql, object param) =>
@@ -47,12 +48,12 @@ namespace Dapper.QX
                     {
                         Single = connection.QuerySingleOrDefault<TResult>(sql, param, transaction, commandTimeout, commandType)
                     };
-                }, traces, setParams);
+                }, logger, setParams);
 
             return result.Single;
         }
 
-        private DapperResult<T> ExecuteInner<T>(Func<string, object, DapperResult<T>> dapperMethod, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
+        private DapperResult<T> ExecuteInner<T>(Func<string, object, DapperResult<T>> dapperMethod, ILogger logger = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
         {
             ResolveSql(out DynamicParameters queryParams, setParams, newPageSize, removeMacros: true);
 
@@ -62,17 +63,15 @@ namespace Dapper.QX
 
                 var stopwatch = Stopwatch.StartNew();
                 var result = dapperMethod.Invoke(ResolvedSql, queryParams);
-                stopwatch.Stop();
-
-                var qt = new QueryTrace(GetType().Name, ResolvedSql, DebugSql, queryParams, stopwatch.Elapsed);
-                OnQueryExecuted(qt);
-                traces?.Add(qt);
+                stopwatch.Stop();                
 
                 return result;
             }
             catch (Exception exc)
             {
-                throw new QueryException(exc, ResolvedSql, DebugSql, queryParams);
+                var qryExc = new QueryException(exc, ResolvedSql, DebugSql, queryParams);
+                logger?.LogError(qryExc, exc.Message);
+                throw qryExc;
             }
         }
     }
