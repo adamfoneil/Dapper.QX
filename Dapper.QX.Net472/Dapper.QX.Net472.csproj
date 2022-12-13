@@ -7,8 +7,8 @@
     <ProjectGuid>{61A892A1-5FA2-44B7-8219-E6C14390EB1C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Dapper.QX.Net46</RootNamespace>
-    <AssemblyName>Dapper.QX.Net46</AssemblyName>
+    <RootNamespace>Dapper.QX.Net472</RootNamespace>
+    <AssemblyName>Dapper.QX.Net472</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
