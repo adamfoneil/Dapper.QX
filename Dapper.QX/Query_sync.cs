@@ -60,6 +60,7 @@ namespace Dapper.QX
             try
             {
                 Debug.Print(DebugSql);
+                logger?.LogDebug(DebugSql);
 
                 var stopwatch = Stopwatch.StartNew();
                 var result = dapperMethod.Invoke(ResolvedSql, queryParams);

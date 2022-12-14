@@ -103,6 +103,7 @@ namespace Dapper.QX
             try
             {                
                 Debug.Print(DebugSql);
+                logger?.LogDebug(DebugSql);
 
                 var stopwatch = Stopwatch.StartNew();
 
