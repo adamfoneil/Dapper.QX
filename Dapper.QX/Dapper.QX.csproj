@@ -12,7 +12,7 @@
 		<PackageProjectUrl>https://github.com/adamosoftware/Dapper.QX</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/adamosoftware/Dapper.QX</RepositoryUrl>
 		<PackageTags>dapper inline-sql</PackageTags>
-		<PackageReleaseNotes>show resolved SQL in Test debug output</PackageReleaseNotes>
+		<PackageReleaseNotes>improved logging - https://github.com/adamfoneil/Dapper.QX/issues/29</PackageReleaseNotes>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<PackageReadmeFile></PackageReadmeFile>
