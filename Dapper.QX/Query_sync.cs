@@ -1,6 +1,5 @@
 ﻿using Dapper.QX.Classes;
 using Dapper.QX.Exceptions;
-using Dapper.QX.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
