@@ -1,7 +1,7 @@
 ﻿using Dapper.QX.Classes;
 using Dapper.QX.Exceptions;
 using Dapper.QX.Extensions;
-using Dapper.QX.Models;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -16,7 +16,7 @@ namespace Dapper.QX
     {
         public Query(string sql)
         {
-            Sql = sql;            
+            Sql = sql;
         }
 
         public string Sql { get; }
@@ -38,7 +38,7 @@ namespace Dapper.QX
             return ResolvedSql;
         }
 
-        public async Task<IEnumerable<TResult>> ExecuteAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
+        public async Task<IEnumerable<TResult>> ExecuteAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
         {
             var result = await ExecuteInnerAsync(connection,
                 async (string sql, object param) =>
@@ -47,12 +47,12 @@ namespace Dapper.QX
                     {
                         Enumerable = await connection.QueryAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
                     };
-                }, traces, setParams, newPageSize);
+                }, logger, setParams, newPageSize);
 
             return result.Enumerable;
         }
 
-        public async Task<TResult> ExecuteSingleAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
+        public async Task<TResult> ExecuteSingleAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null)
         {
             var result = await ExecuteInnerAsync(connection,
                 async (string sql, object param) =>
@@ -61,12 +61,12 @@ namespace Dapper.QX
                     {
                         Single = await connection.QuerySingleAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
                     };
-                }, traces, setParams);
+                }, logger, setParams);
 
             return result.Single;
         }
 
-        public async Task<TResult> ExecuteSingleOrDefaultAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null)
+        public async Task<TResult> ExecuteSingleOrDefaultAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null)
         {
             var result = await ExecuteInnerAsync(connection,
                 async (string sql, object param) =>
@@ -75,12 +75,12 @@ namespace Dapper.QX
                     {
                         Single = await connection.QuerySingleOrDefaultAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
                     };
-                }, traces, setParams);
+                }, logger, setParams);
             
             return result.Single;
         }
 
-        private async Task<DapperResult<T>> ExecuteInnerAsync<T>(IDbConnection connection, Func<string, object, Task<DapperResult<T>>> dapperMethod, List<QueryTrace> traces = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
+        private async Task<DapperResult<T>> ExecuteInnerAsync<T>(IDbConnection connection, Func<string, object, Task<DapperResult<T>>> dapperMethod, ILogger logger = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
         {
             ResolveSql(out DynamicParameters queryParams, setParams, newPageSize);
 
@@ -103,6 +103,7 @@ namespace Dapper.QX
             try
             {                
                 Debug.Print(DebugSql);
+                logger?.LogDebug(DebugSql);
 
                 var stopwatch = Stopwatch.StartNew();
 
@@ -112,19 +113,13 @@ namespace Dapper.QX
                 var result = await dapperMethod.Invoke(ResolvedSql, queryParams);
                 stopwatch.Stop();                
 
-                var qt = new QueryTrace(GetType().Name, ResolvedSql, DebugSql, queryParams, stopwatch.Elapsed);
-                OnQueryExecuted(qt);
-
-#if NETSTANDARD2_0
-                await OnQueryExecutedAsync(connection, qt);
-#endif
-                traces?.Add(qt);
-
                 return result;
             }
             catch (Exception exc)
             {                
-                throw new QueryException(exc, ResolvedSql, DebugSql, queryParams);
+                var qryExc = new QueryException(exc, ResolvedSql, DebugSql, queryParams);
+                logger?.LogError(exc, exc.Message);
+                throw qryExc;
             }            
         }
 
@@ -164,13 +159,6 @@ namespace Dapper.QX
                 // if any error, just give me what I started with
                 return resolvedSql;
             }            
-        }
-
-        /// <summary>
-        /// Override this to capture information about a query execution in your application
-        /// </summary>		
-        protected virtual void OnQueryExecuted(QueryTrace queryTrace)
-        {
         }
 
         /// <summary>
