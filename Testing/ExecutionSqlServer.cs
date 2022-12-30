@@ -2,6 +2,7 @@
 using Dapper;
 using Dapper.QX;
 using Dapper.QX.Extensions;
+using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SqlIntegration.Library;
 using SqlIntegration.Library.Classes;
@@ -41,10 +42,10 @@ namespace Testing
                     if (cn.State == ConnectionState.Closed) cn.Open();
 
                     var dataTable = results.ToDataTable();
-                    BulkInsert.ExecuteAsync(dataTable, cn, DbObject.Parse("dbo.SampleTable"), 50, new BulkInsertOptions()
-                    {
-                        SkipIdentityColumn = "Id"
-                    }).Wait();
+
+                    using var bulkInsert = new SqlBulkCopy(cn);
+                    bulkInsert.DestinationTableName = "dbo.SampleTable";
+                    bulkInsert.WriteToServer(dataTable);
                 });
             }
         }

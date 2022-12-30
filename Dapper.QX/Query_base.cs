@@ -117,7 +117,7 @@ namespace Dapper.QX
             }
             catch (Exception exc)
             {                
-                var qryExc = new QueryException(exc, ResolvedSql, DebugSql, queryParams);
+                var qryExc = new QueryException(exc, ResolvedSql, DebugSql, queryParams, GetType());
                 logger?.LogError(exc, exc.Message);
                 throw qryExc;
             }            
