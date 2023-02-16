@@ -216,7 +216,7 @@ namespace Dapper.QX
 
             bool IncludeJoin(PropertyInfo pi)
             {
-                if (pi.GetValue(parameters).Equals(true)) return true;
+                if (pi.GetValue(parameters)?.Equals(true) ?? false) return true;
 
                 if (pi.HasAttribute<TableType>())
                 {
@@ -373,6 +373,7 @@ namespace Dapper.QX
                 pi.HasAttribute<CaseAttribute>() ||
                 pi.HasAttribute<PhraseAttribute>() ||
                 pi.HasAttribute<ParameterAttribute>() ||
+                (pi.HasAttribute<JoinAttribute>() && pi.HasAttribute<TableType>()) ||
                 allParams.Contains(pi.Name.ToLower()));
 
             return queryProps;
