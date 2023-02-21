@@ -28,12 +28,17 @@ namespace Dapper.QX
         {
             return ResolveSql(out _, newPageSize: newPageSize, removeMacros: removeMacros);
         }
-
+        
         public string ResolveSql(out DynamicParameters queryParams, Action<DynamicParameters> setParams = null, int newPageSize = 0, bool removeMacros = false)
         {
             ResolvedSql = QueryHelper.ResolveSql(Sql, this, out queryParams, newPageSize, removeMacros);
-            setParams?.Invoke(queryParams);            
-            DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + DebugResolveArrays(ResolvedSql);
+            setParams?.Invoke(queryParams);
+            
+            if (QueryHelper.GenerateDebugSql)
+            {
+                DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + DebugResolveArrays(ResolvedSql);
+            }
+            
             Parameters = queryParams;
             return ResolvedSql;
         }
@@ -95,7 +100,10 @@ namespace Dapper.QX
                 foreach (var macro in macroInserts.inserts)
                 {
                     ResolvedSql = ResolvedSql.Replace(macro.Key, macro.Value);
-                    DebugSql = DebugSql.Replace(macro.Key, macro.Value);
+                    if (QueryHelper.GenerateDebugSql)
+                    {
+                        DebugSql = DebugSql.Replace(macro.Key, macro.Value);
+                    }                    
                 }
             }
 #endif            

@@ -24,6 +24,8 @@ namespace Dapper.QX
 
         public const string GlobalScope = "global";
 
+        public static bool GenerateDebugSql { get; set; } = true;
+
         public static string ResolveSql(string sql, object parameters, int newPageSize = 0, bool removeMacros = false)
         {
             return ResolveSql(sql, parameters, out _, newPageSize, removeMacros);
