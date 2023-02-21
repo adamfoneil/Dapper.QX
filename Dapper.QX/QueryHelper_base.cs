@@ -211,10 +211,23 @@ namespace Dapper.QX
         private static string ResolveOptionalJoins(string sql, object parameters)
         {
             var joinTerms = parameters.GetType().GetProperties()
-               .Where(pi => pi.HasAttribute<JoinAttribute>() && pi.GetValue(parameters).Equals(true))
+               .Where(pi => pi.HasAttribute<JoinAttribute>() && IncludeJoin(pi))
                .Select(pi => pi.GetAttribute<JoinAttribute>().Sql);
 
             return sql.Replace(JoinToken, string.Join("\r\n", joinTerms));
+
+            bool IncludeJoin(PropertyInfo pi)
+            {
+                if (pi.GetValue(parameters)?.Equals(true) ?? false) return true;
+
+                if (pi.HasAttribute<TableType>())
+                {
+                    var data = pi.GetValue(parameters) as DataTable;
+                    return (data != null);
+                }
+
+                return false;
+            }
         }
 
         private static string ResolveTopClause(string sql, object parameters, DynamicParameters dynamicParams)
@@ -362,6 +375,7 @@ namespace Dapper.QX
                 pi.HasAttribute<CaseAttribute>() ||
                 pi.HasAttribute<PhraseAttribute>() ||
                 pi.HasAttribute<ParameterAttribute>() ||
+                (pi.HasAttribute<JoinAttribute>() && pi.HasAttribute<TableType>()) ||
                 allParams.Contains(pi.Name.ToLower()));
 
             return queryProps;
