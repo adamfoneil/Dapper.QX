@@ -100,7 +100,10 @@ namespace Dapper.QX
                 foreach (var macro in macroInserts.inserts)
                 {
                     ResolvedSql = ResolvedSql.Replace(macro.Key, macro.Value);
-                    DebugSql = DebugSql.Replace(macro.Key, macro.Value);
+                    if (QueryHelper.GenerateDebugSql)
+                    {
+                        DebugSql = DebugSql.Replace(macro.Key, macro.Value);
+                    }                    
                 }
             }
 #endif            

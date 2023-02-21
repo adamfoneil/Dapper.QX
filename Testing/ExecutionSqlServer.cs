@@ -22,9 +22,13 @@ namespace Testing
     {
         private const string dbName = "DapperQX";
 
+        public const bool ShouldDebugSql = false;
+
         [ClassInitialize]
         public static void Initialize(TestContext context)
         {
+            QueryHelper.GenerateDebugSql = ShouldDebugSql;
+
             LocalDb.TryDropDatabase(dbName, out _);
 
             using (var cn = LocalDb.GetConnection(dbName, SampleObjects()))
@@ -101,20 +105,29 @@ namespace Testing
         [TestMethod]
         public void QueryDynamicParams()
         {
-            using (var cn = LocalDb.GetConnection(dbName))
+            QueryHelper.GenerateDebugSql = true;
+
+            try
             {
-                var qry = new DynamicQuery("[SomeDate]>@minDate") { FirstName = "peabody" };                
-                var results = qry.Execute(cn, setParams: (queryParams) =>
+                using (var cn = LocalDb.GetConnection(dbName))
                 {
-                    queryParams.Add("minDate", new DateTime(1990, 1, 1));
-                });
-                Assert.IsTrue(qry.ResolvedSql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [SomeDate]>@minDate AND [FirstName] LIKE '%'+@firstName+'%' ORDER BY [FirstName]"));
-                Assert.IsTrue(qry.DebugSql.ReplaceWhitespace().Equals(
-                    @"DECLARE @FirstName nvarchar(max), @minDate datetime;
+                    var qry = new DynamicQuery("[SomeDate]>@minDate") { FirstName = "peabody" };
+                    var results = qry.Execute(cn, setParams: (queryParams) =>
+                    {
+                        queryParams.Add("minDate", new DateTime(1990, 1, 1));
+                    });
+                    Assert.IsTrue(qry.ResolvedSql.Equals("SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [SomeDate]>@minDate AND [FirstName] LIKE '%'+@firstName+'%' ORDER BY [FirstName]"));
+                    Assert.IsTrue(qry.DebugSql.ReplaceWhitespace().Equals(
+                        @"DECLARE @FirstName nvarchar(max), @minDate datetime;
                     SET @FirstName = 'peabody';
                     SET @minDate = '1/1/1990 12:00:00 AM';
 
                     SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [SomeDate]>@minDate AND [FirstName] LIKE '%'+@firstName+'%' ORDER BY [FirstName]".ReplaceWhitespace()));
+                }
+            }
+            finally
+            {
+                QueryHelper.GenerateDebugSql = ShouldDebugSql;
             }
         }
         
@@ -200,24 +213,33 @@ namespace Testing
         [TestMethod]
         public void DebugSql()
         {
-            var qry = new TypicalQuery()
+            QueryHelper.GenerateDebugSql = true;
+
+            try
             {
-                MinWeight = 9,
-                MaxWeight = 56,
-                FirstNameLike = "warbler",
-                MinDate = new DateTime(2020, 1, 15)
-            };            
+                var qry = new TypicalQuery()
+                {
+                    MinWeight = 9,
+                    MaxWeight = 56,
+                    FirstNameLike = "warbler",
+                    MinDate = new DateTime(2020, 1, 15)
+                };
 
-            qry.ResolveSql(removeMacros: true);
-            string debug = qry.DebugSql;
-            Assert.IsTrue(debug.ReplaceWhitespace().Equals(
-                @"DECLARE @MinWeight decimal, @MaxWeight decimal, @FirstNameLike nvarchar(max), @MinDate datetime;
-                SET @MinWeight = 9;
-                SET @MaxWeight = 56;
-                SET @FirstNameLike = 'warbler';
-                SET @MinDate = '1/15/2020 12:00:00 AM';
+                qry.ResolveSql(removeMacros: true);
+                string debug = qry.DebugSql;
+                Assert.IsTrue(debug.ReplaceWhitespace().Equals(
+                    @"DECLARE @MinWeight decimal, @MaxWeight decimal, @FirstNameLike nvarchar(max), @MinDate datetime;
+                    SET @MinWeight = 9;
+                    SET @MaxWeight = 56;
+                    SET @FirstNameLike = 'warbler';
+                    SET @MinDate = '1/15/2020 12:00:00 AM';
 
-                SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [Weight]>=@minWeight AND [Weight]<=@maxWeight AND [FirstName] LIKE '%'+@firstNameLike+'%' AND [SomeDate]>=@minDate  ORDER BY [FirstName]".ReplaceWhitespace()));      
+                    SELECT [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] WHERE [Weight]>=@minWeight AND [Weight]<=@maxWeight AND [FirstName] LIKE '%'+@firstNameLike+'%' AND [SomeDate]>=@minDate  ORDER BY [FirstName]".ReplaceWhitespace()));
+            }
+            finally
+            {
+                QueryHelper.GenerateDebugSql = ShouldDebugSql;
+            }            
         }
 
         [TestMethod]
