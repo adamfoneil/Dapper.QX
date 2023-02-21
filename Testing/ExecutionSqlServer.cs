@@ -4,8 +4,6 @@ using Dapper.QX;
 using Dapper.QX.Extensions;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SqlIntegration.Library;
-using SqlIntegration.Library.Classes;
 using SqlServer.LocalDb;
 using SqlServer.LocalDb.Models;
 using System;
@@ -26,7 +24,7 @@ namespace Testing
 
         [ClassInitialize]
         public static void Initialize(TestContext context)
-        {
+        {            
             QueryHelper.GenerateDebugSql = ShouldDebugSql;
 
             LocalDb.TryDropDatabase(dbName, out _);
