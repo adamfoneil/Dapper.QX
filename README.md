@@ -108,7 +108,7 @@ internal class SimpleTvpExample : Query<int>
     public DataTable Source { get; set; }
 }
 ```
-Set the `Source` property like any other parameter. You can create a `DataTable` dynamically with the [ToDataTable](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Extensions/EnumerableExtensions.cs#L17) extension method, as in the [test](https://github.com/adamfoneil/Dapper.QX/blob/master/Testing/ExecutionSqlServer.cs#L238):
+Set the `Source` property like any other parameter. You can create a `DataTable` dynamically with the [ToDataTable](https://github.com/adamfoneil/Dapper.QX/blob/master/Dapper.QX/Extensions/EnumerableExtensions.cs#L17) extension method, as in the [test](https://github.com/adamfoneil/Dapper.QX/blob/master/Testing/ExecutionSqlServer.cs#L244):
 
 ```csharp
 var qry = new SimpleTvpExample() { Source = new int[] { 1, 2, 3 }.ToDataTable() };
