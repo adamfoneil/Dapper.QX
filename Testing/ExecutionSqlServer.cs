@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Testing.Queries;
 
 namespace Testing
@@ -295,6 +296,22 @@ namespace Testing
                 var results = qry.Execute(cn);
                 Assert.IsTrue(results.Select(row => row.Id).SequenceEqual(data.Select(row => row.Id)));
             }
+        }
+
+        [TestMethod]
+        public async Task DateParamError()
+        {
+            using var cn = LocalDb.GetConnection(dbName);
+            var qry = new TypicalQuery() { MinDate = new DateTime(1, 1, 1) };
+
+            try
+            {
+                var results = await qry.ExecuteAsync(cn);
+            }
+            catch (Exception exc)
+            {
+                Assert.IsTrue(exc.Message.Contains("in TypicalQuery"));
+            }            
         }
     }
 }
