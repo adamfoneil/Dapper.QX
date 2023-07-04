@@ -126,7 +126,7 @@ namespace Dapper.QX
             catch (Exception exc)
             {                
                 var qryExc = new QueryException(exc, ResolvedSql, DebugSql, queryParams, GetType());
-                logger?.LogError(exc, "Error in {queryClass}:" + exc.Message, this.GetType().Name);
+                logger?.LogError(exc, "Error in {queryClass} with {@queryParams}: " + exc.Message, this.GetType().Name, queryParams);
                 throw qryExc;
             }            
         }
