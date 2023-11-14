@@ -2,17 +2,17 @@
 
 namespace Dapper.QX.Attributes
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
-    public class OrderByAttribute : Attribute
-    {
-        public OrderByAttribute(object value, string expression)
-        {
-            Value = value;
-            Expression = expression;
-        }
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+	public class OrderByAttribute : Attribute
+	{
+		public OrderByAttribute(object value, string expression)
+		{
+			Value = value;
+			Expression = expression;
+		}
 
-        public object Value { get; }
+		public object Value { get; }
 
-        public string Expression { get; }
-    }
+		public string Expression { get; }
+	}
 }

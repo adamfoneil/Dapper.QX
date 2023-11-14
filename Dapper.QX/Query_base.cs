@@ -12,177 +12,177 @@ using System.Threading.Tasks;
 
 namespace Dapper.QX
 {
-    public partial class Query<TResult>
-    {
-        public Query(string sql)
-        {
-            Sql = sql;
-        }
+	public partial class Query<TResult>
+	{
+		public Query(string sql)
+		{
+			Sql = sql;
+		}
 
-        public string Sql { get; }
-        public string ResolvedSql { get; private set; }
-        public string DebugSql { get; private set; }
-        public DynamicParameters Parameters { get; private set; }
+		public string Sql { get; }
+		public string ResolvedSql { get; private set; }
+		public string DebugSql { get; private set; }
+		public DynamicParameters Parameters { get; private set; }
 
-        public string ResolveSql(int newPageSize = 0, bool removeMacros = false)
-        {
-            return ResolveSql(out _, newPageSize: newPageSize, removeMacros: removeMacros);
-        }
-        
-        public string ResolveSql(out DynamicParameters queryParams, Action<DynamicParameters> setParams = null, int newPageSize = 0, bool removeMacros = false)
-        {
-            ResolvedSql = QueryHelper.ResolveSql(Sql, this, out queryParams, newPageSize, removeMacros);
-            setParams?.Invoke(queryParams);
-            
-            if (QueryHelper.GenerateDebugSql)
-            {
-                DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + DebugResolveArrays(ResolvedSql);
-            }
-            
-            Parameters = queryParams;
-            return ResolvedSql;
-        }
+		public string ResolveSql(int newPageSize = 0, bool removeMacros = false)
+		{
+			return ResolveSql(out _, newPageSize: newPageSize, removeMacros: removeMacros);
+		}
 
-        public async Task<IEnumerable<TResult>> ExecuteAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
-        {
-            var result = await ExecuteInnerAsync(connection,
-                async (string sql, object param) =>
-                {
-                    return new DapperResult<TResult>()
-                    {
-                        Enumerable = await connection.QueryAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
-                    };
-                }, logger, setParams, newPageSize);
+		public string ResolveSql(out DynamicParameters queryParams, Action<DynamicParameters> setParams = null, int newPageSize = 0, bool removeMacros = false)
+		{
+			ResolvedSql = QueryHelper.ResolveSql(Sql, this, out queryParams, newPageSize, removeMacros);
+			setParams?.Invoke(queryParams);
 
-            return result.Enumerable;
-        }
+			if (QueryHelper.GenerateDebugSql)
+			{
+				DebugSql = QueryHelper.ResolveParams(this, queryParams) + "\r\n\r\n" + DebugResolveArrays(ResolvedSql);
+			}
 
-        public async Task<TResult> ExecuteSingleAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null)
-        {
-            var result = await ExecuteInnerAsync(connection,
-                async (string sql, object param) =>
-                {
-                    return new DapperResult<TResult>()
-                    {
-                        Single = await connection.QuerySingleAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
-                    };
-                }, logger, setParams);
+			Parameters = queryParams;
+			return ResolvedSql;
+		}
 
-            return result.Single;
-        }
+		public async Task<IEnumerable<TResult>> ExecuteAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
+		{
+			var result = await ExecuteInnerAsync(connection,
+				async (string sql, object param) =>
+				{
+					return new DapperResult<TResult>()
+					{
+						Enumerable = await connection.QueryAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
+					};
+				}, logger, setParams, newPageSize);
 
-        public async Task<TResult> ExecuteSingleOrDefaultAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null)
-        {
-            var result = await ExecuteInnerAsync(connection,
-                async (string sql, object param) =>
-                {
-                    return new DapperResult<TResult>()
-                    {
-                        Single = await connection.QuerySingleOrDefaultAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
-                    };
-                }, logger, setParams);
-            
-            return result.Single;
-        }
+			return result.Enumerable;
+		}
 
-        private async Task<DapperResult<T>> ExecuteInnerAsync<T>(IDbConnection connection, Func<string, object, Task<DapperResult<T>>> dapperMethod, ILogger logger = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
-        {
-            ResolveSql(out DynamicParameters queryParams, setParams, newPageSize);
+		public async Task<TResult> ExecuteSingleAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null)
+		{
+			var result = await ExecuteInnerAsync(connection,
+				async (string sql, object param) =>
+				{
+					return new DapperResult<TResult>()
+					{
+						Single = await connection.QuerySingleAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
+					};
+				}, logger, setParams);
 
-            var macros = RegexHelper.ParseMacros(ResolvedSql);
+			return result.Single;
+		}
 
-#if NETSTANDARD2_0
-            var macroInserts = await ResolveMacrosAsync(connection, macros);
+		public async Task<TResult> ExecuteSingleOrDefaultAsync(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null)
+		{
+			var result = await ExecuteInnerAsync(connection,
+				async (string sql, object param) =>
+				{
+					return new DapperResult<TResult>()
+					{
+						Single = await connection.QuerySingleOrDefaultAsync<TResult>(sql, param, transaction, commandTimeout, commandType)
+					};
+				}, logger, setParams);
 
-            if (macroInserts.inserts.Any())
-            {
-                queryParams.AddDynamicParams(macroInserts.parameters);
-                foreach (var macro in macroInserts.inserts)
-                {
-                    ResolvedSql = ResolvedSql.Replace(macro.Key, macro.Value);
-                    if (QueryHelper.GenerateDebugSql)
-                    {
-                        DebugSql = DebugSql.Replace(macro.Key, macro.Value);
-                    }                    
-                }
-            }
-#endif            
+			return result.Single;
+		}
 
-            try
-            {                
-                Debug.Print(DebugSql);
-                logger?.LogDebug(DebugSql);
+		private async Task<DapperResult<T>> ExecuteInnerAsync<T>(IDbConnection connection, Func<string, object, Task<DapperResult<T>>> dapperMethod, ILogger logger = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
+		{
+			ResolveSql(out DynamicParameters queryParams, setParams, newPageSize);
 
-                var stopwatch = Stopwatch.StartNew();
+			var macros = RegexHelper.ParseMacros(ResolvedSql);
 
 #if NETSTANDARD2_0
-                await OnExecutingAsync(connection, queryParams);
-#endif
-                var result = await dapperMethod.Invoke(ResolvedSql, queryParams);
-                stopwatch.Stop();                
+			var macroInserts = await ResolveMacrosAsync(connection, macros);
 
-                return result;
-            }
-            catch (Exception exc)
-            {                
-                var qryExc = new QueryException(exc, ResolvedSql, DebugSql, queryParams, GetType());
-                logger?.LogError(exc, "Error in {queryClass} with {@queryParams}: " + exc.Message, this.GetType().Name, queryParams);
-                throw qryExc;
-            }            
-        }
-
-#if NETSTANDARD2_0
-        protected virtual async Task<(Dictionary<string, string> inserts, DynamicParameters parameters)> ResolveMacrosAsync(IDbConnection connection, IEnumerable<string> macros) => await Task.FromResult((macros.ToDictionary(m => m, m => string.Empty), new DynamicParameters()));
-
-        protected virtual async Task OnExecutingAsync(IDbConnection connection, DynamicParameters parameters) => await Task.CompletedTask;
+			if (macroInserts.inserts.Any())
+			{
+				queryParams.AddDynamicParams(macroInserts.parameters);
+				foreach (var macro in macroInserts.inserts)
+				{
+					ResolvedSql = ResolvedSql.Replace(macro.Key, macro.Value);
+					if (QueryHelper.GenerateDebugSql)
+					{
+						DebugSql = DebugSql.Replace(macro.Key, macro.Value);
+					}
+				}
+			}
 #endif
 
-        private string DebugResolveArrays(string resolvedSql)
-        {
-            string result = resolvedSql;
+			try
+			{
+				Debug.Print(DebugSql);
+				logger?.LogDebug(DebugSql);
 
-            // todo: add string delimiter, ensure pi.GetValue works with string.Join
+				var stopwatch = Stopwatch.StartNew();
 
-            try
-            {
-                var props = this.GetType().GetProperties().Where(pi => pi.PropertyType.IsArray).Select(pi =>
-                {
-                    var values = pi.GetValue(this) as int[];
-                    return new
-                    {
-                        Token = " IN @" + pi.Name.ToLower(),
-                        ValueList = " IN (" + string.Join(", ", values) + ")"
-                    };
-                });
+#if NETSTANDARD2_0
+				await OnExecutingAsync(connection, queryParams);
+#endif
+				var result = await dapperMethod.Invoke(ResolvedSql, queryParams);
+				stopwatch.Stop();
 
-                foreach (var p in props)
-                {
-                    result = Regex.Replace(result, p.Token, p.ValueList, RegexOptions.IgnoreCase);                        
-                }
+				return result;
+			}
+			catch (Exception exc)
+			{
+				var qryExc = new QueryException(exc, ResolvedSql, DebugSql, queryParams, GetType());
+				logger?.LogError(exc, "Error in {queryClass} with {@queryParams}: " + exc.Message, this.GetType().Name, queryParams);
+				throw qryExc;
+			}
+		}
 
-                return result;
-            }
-            catch 
-            {
-                // if any error, just give me what I started with
-                return resolvedSql;
-            }            
-        }
+#if NETSTANDARD2_0
+		protected virtual async Task<(Dictionary<string, string> inserts, DynamicParameters parameters)> ResolveMacrosAsync(IDbConnection connection, IEnumerable<string> macros) => await Task.FromResult((macros.ToDictionary(m => m, m => string.Empty), new DynamicParameters()));
 
-        /// <summary>
-        /// Intended for implementing <see cref="Interfaces.ITestableQuery"/> for unit testing, not intended for use on its own
-        /// </summary>
-        public IEnumerable<dynamic> TestExecuteHelper(IDbConnection connection)
-        {
-            try
-            {
-                ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams, removeMacros: true);
-                return connection.Query(ResolvedSql, queryParams);
-            }
-            catch (Exception exc)
-            {
-                throw new Exception($"Query {GetType().Name} failed: {exc.Message}", exc);
-            }
-        }
-    }
+		protected virtual async Task OnExecutingAsync(IDbConnection connection, DynamicParameters parameters) => await Task.CompletedTask;
+#endif
+
+		private string DebugResolveArrays(string resolvedSql)
+		{
+			string result = resolvedSql;
+
+			// todo: add string delimiter, ensure pi.GetValue works with string.Join
+
+			try
+			{
+				var props = this.GetType().GetProperties().Where(pi => pi.PropertyType.IsArray).Select(pi =>
+				{
+					var values = pi.GetValue(this) as int[];
+					return new
+					{
+						Token = " IN @" + pi.Name.ToLower(),
+						ValueList = " IN (" + string.Join(", ", values) + ")"
+					};
+				});
+
+				foreach (var p in props)
+				{
+					result = Regex.Replace(result, p.Token, p.ValueList, RegexOptions.IgnoreCase);
+				}
+
+				return result;
+			}
+			catch
+			{
+				// if any error, just give me what I started with
+				return resolvedSql;
+			}
+		}
+
+		/// <summary>
+		/// Intended for implementing <see cref="Interfaces.ITestableQuery"/> for unit testing, not intended for use on its own
+		/// </summary>
+		public IEnumerable<dynamic> TestExecuteHelper(IDbConnection connection)
+		{
+			try
+			{
+				ResolvedSql = QueryHelper.ResolveSql(Sql, this, out DynamicParameters queryParams, removeMacros: true);
+				return connection.Query(ResolvedSql, queryParams);
+			}
+			catch (Exception exc)
+			{
+				throw new Exception($"Query {GetType().Name} failed: {exc.Message}", exc);
+			}
+		}
+	}
 }

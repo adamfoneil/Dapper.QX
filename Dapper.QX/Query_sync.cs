@@ -8,71 +8,71 @@ using System.Diagnostics;
 
 namespace Dapper.QX
 {
-    public partial class Query<TResult>
-    {
-        public IEnumerable<TResult> Execute(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
-        {
-            var result = ExecuteInner(
-                (string sql, object param) =>
-                {
-                    return new DapperResult<TResult>()
-                    {
-                        Enumerable = connection.Query<TResult>(sql, param, transaction, commandTimeout: commandTimeout, commandType: commandType)
-                    };
-                }, logger, setParams, newPageSize);
+	public partial class Query<TResult>
+	{
+		public IEnumerable<TResult> Execute(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
+		{
+			var result = ExecuteInner(
+				(string sql, object param) =>
+				{
+					return new DapperResult<TResult>()
+					{
+						Enumerable = connection.Query<TResult>(sql, param, transaction, commandTimeout: commandTimeout, commandType: commandType)
+					};
+				}, logger, setParams, newPageSize);
 
-            return result.Enumerable;
-        }
+			return result.Enumerable;
+		}
 
-        public TResult ExecuteSingle(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null)
-        {
-            var result = ExecuteInner(
-                (string sql, object param) =>
-                {
-                    return new DapperResult<TResult>()
-                    {
-                        Single = connection.QuerySingle<TResult>(sql, param, transaction, commandTimeout, commandType)
-                    };
-                }, logger, setParams);
+		public TResult ExecuteSingle(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null)
+		{
+			var result = ExecuteInner(
+				(string sql, object param) =>
+				{
+					return new DapperResult<TResult>()
+					{
+						Single = connection.QuerySingle<TResult>(sql, param, transaction, commandTimeout, commandType)
+					};
+				}, logger, setParams);
 
-            return result.Single;
-        }
+			return result.Single;
+		}
 
-        public TResult ExecuteSingleOrDefault(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null)
-        {
-            var result = ExecuteInner(
-                (string sql, object param) =>
-                {
-                    return new DapperResult<TResult>()
-                    {
-                        Single = connection.QuerySingleOrDefault<TResult>(sql, param, transaction, commandTimeout, commandType)
-                    };
-                }, logger, setParams);
+		public TResult ExecuteSingleOrDefault(IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, ILogger logger = null, Action<DynamicParameters> setParams = null)
+		{
+			var result = ExecuteInner(
+				(string sql, object param) =>
+				{
+					return new DapperResult<TResult>()
+					{
+						Single = connection.QuerySingleOrDefault<TResult>(sql, param, transaction, commandTimeout, commandType)
+					};
+				}, logger, setParams);
 
-            return result.Single;
-        }
+			return result.Single;
+		}
 
-        private DapperResult<T> ExecuteInner<T>(Func<string, object, DapperResult<T>> dapperMethod, ILogger logger = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
-        {
-            ResolveSql(out DynamicParameters queryParams, setParams, newPageSize, removeMacros: true);
+		private DapperResult<T> ExecuteInner<T>(Func<string, object, DapperResult<T>> dapperMethod, ILogger logger = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
+		{
+			ResolveSql(out DynamicParameters queryParams, setParams, newPageSize, removeMacros: true);
 
-            try
-            {
-                Debug.Print(DebugSql);
-                logger?.LogDebug(DebugSql);
+			try
+			{
+				Debug.Print(DebugSql);
+				logger?.LogDebug(DebugSql);
 
-                var stopwatch = Stopwatch.StartNew();
-                var result = dapperMethod.Invoke(ResolvedSql, queryParams);
-                stopwatch.Stop();                
+				var stopwatch = Stopwatch.StartNew();
+				var result = dapperMethod.Invoke(ResolvedSql, queryParams);
+				stopwatch.Stop();
 
-                return result;
-            }
-            catch (Exception exc)
-            {
-                var qryExc = new QueryException(exc, ResolvedSql, DebugSql, queryParams, GetType());
-                logger?.LogError(qryExc, exc.Message);
-                throw qryExc;
-            }
-        }
-    }
+				return result;
+			}
+			catch (Exception exc)
+			{
+				var qryExc = new QueryException(exc, ResolvedSql, DebugSql, queryParams, GetType());
+				logger?.LogError(qryExc, exc.Message);
+				throw qryExc;
+			}
+		}
+	}
 }

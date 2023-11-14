@@ -4,16 +4,16 @@ using System.Data;
 
 namespace Dapper.QX.Abstract
 {
-    public abstract class TestableQuery<TResult> : Query<TResult>, ITestableQuery
-    {
-        public TestableQuery(string sql) : base(sql)
-        {
-        }
+	public abstract class TestableQuery<TResult> : Query<TResult>, ITestableQuery
+	{
+		public TestableQuery(string sql) : base(sql)
+		{
+		}
 
-        protected abstract IEnumerable<ITestableQuery> GetTestCasesInner();
+		protected abstract IEnumerable<ITestableQuery> GetTestCasesInner();
 
-        public IEnumerable<dynamic> TestExecute(IDbConnection connection) => TestExecuteHelper(connection);
+		public IEnumerable<dynamic> TestExecute(IDbConnection connection) => TestExecuteHelper(connection);
 
-        public IEnumerable<ITestableQuery> GetTestCases() => GetTestCasesInner();        
-    }
+		public IEnumerable<ITestableQuery> GetTestCases() => GetTestCasesInner();
+	}
 }

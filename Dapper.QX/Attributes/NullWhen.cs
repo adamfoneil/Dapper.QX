@@ -2,14 +2,14 @@
 
 namespace Dapper.QX.Attributes
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class NullWhenAttribute : Attribute
-    {
-        public NullWhenAttribute(params object[] values)
-        {
-            NullValues = values;
-        }
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+	public class NullWhenAttribute : Attribute
+	{
+		public NullWhenAttribute(params object[] values)
+		{
+			NullValues = values;
+		}
 
-        public object[] NullValues { get; }
-    }
+		public object[] NullValues { get; }
+	}
 }
