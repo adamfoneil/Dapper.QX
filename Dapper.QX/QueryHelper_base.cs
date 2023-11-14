@@ -222,9 +222,10 @@ namespace Dapper.QX
 
                 if (pi.HasAttribute<TableType>())
                 {
-                    var data = pi.GetValue(parameters) as DataTable;
-                    return (data != null);
-                }
+					return (pi.GetValue(parameters) is DataTable data);
+				}
+
+                if (pi.GetValue(parameters) != null) return true;
 
                 return false;
             }
