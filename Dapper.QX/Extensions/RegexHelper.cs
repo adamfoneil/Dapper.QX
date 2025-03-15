@@ -43,6 +43,12 @@ namespace Dapper.QX.Extensions
 			return matches.OfType<Match>().Select(m => (cleaned) ? m.Value.Substring(1) : m.Value);
 		}
 
+		public static bool HasParameters(this string sql, out string[] paramNames)
+		{
+			paramNames = ParseParameterNames(sql, cleaned: true).ToArray();
+			return paramNames.Any();
+		}
+
 		public static IEnumerable<string> ParsePlaceholders(string input)
 		{
 			var matches = Regex.Matches(input, @"\{([^}]+)\}");

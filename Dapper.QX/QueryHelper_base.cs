@@ -54,7 +54,7 @@ namespace Dapper.QX
 			result = ResolveInlineOptionalCriteria(result, parameters, paramInfo);
 			result = ResolveOrderBy(result, parameters, queryTypeName);
 			result = ResolveTopClause(result, parameters, dynamicParams);
-			result = ResolveOptionalJoins(result, parameters);
+			result = ResolveOptionalJoins(result, parameters, dynamicParams);
 			result = ResolveInjectedCriteria(result, paramInfo, properties, parameters, dynamicParams);
 			result = ResolveOffset(result, parameters, newPageSize);
 			result = RegexHelper.RemovePlaceholders(result);
@@ -208,31 +208,46 @@ namespace Dapper.QX
 			return false;
 		}
 
-		private static string ResolveOptionalJoins(string sql, object parameters)
+		private static string ResolveOptionalJoins(string sql, object parameters, DynamicParameters dynamicParams)
 		{
 			var joinTerms = parameters.GetType().GetProperties()
 			   .Where(pi => pi.HasAttribute<JoinAttribute>() && IncludeJoin(pi))
-			   .Select(pi => pi.GetAttribute<JoinAttribute>().Sql);
+			   .Select(pi => pi.GetAttribute<JoinAttribute>().Sql)
+			   .ToArray();
+			
+			var type = parameters.GetType();
 
-			return sql.Replace(JoinToken, string.Join("\r\n", joinTerms));
+			foreach (var term in joinTerms)
+			{
+				if (term.HasParameters(out var paramNames))
+				{
+					foreach (var name in paramNames)
+					{
+						var property = type.GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+						if (property != null)
+						{
+							var propertyValue = property.GetValue(parameters);
+							if (propertyValue != null) dynamicParams.Add(name, propertyValue);
+						}
+					}
+				}				
+			}
+
+			return sql.Replace(JoinToken, string.Join("\r\n", joinTerms));			
 
 			bool IncludeJoin(PropertyInfo pi)
 			{
-				var propertyVal = pi.GetValue(parameters);
-
-				if (propertyVal?.Equals(true) ?? false) return true;
-
-				if (pi.HasAttribute<TableType>())
+				if (HasValue(pi, parameters, out var value))
 				{
-					return (propertyVal is DataTable data);
+					if (pi.PropertyType.Equals(typeof(bool)))
+					{
+						return (bool)value;
+					}
+
+					return true;
 				}
-								
-				if (propertyVal != null && pi.HasAttribute<NullWhenAttribute>(out var attr))
-				{
-					if (attr.NullValues?.Contains(propertyVal) ?? false) return false;
-				}					
-													
-				return propertyVal != null;
+
+				return false;
 			}
 		}
 
