@@ -18,7 +18,7 @@ namespace Testing.Queries
 
     public class TypicalQuery : Query<TypicalQueryResult>, ITestableQuery, ISelfModifyingQuery
     {
-        public TypicalQuery() : base("SELECT {top} [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] {where} **removethis** <<macro>> ORDER BY [FirstName] {offset}")
+        public TypicalQuery() : base("SELECT {top} [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] {join} {where} **removethis** <<macro>> ORDER BY [FirstName] {offset}")
         {
         }
 
@@ -46,10 +46,18 @@ namespace Testing.Queries
         [Offset(20)]
         public int? PageNumber { get; set; }
 
-        /// <summary>
-        /// not a practical example, but demonstrates how query can be "self-modified" when run
-        /// </summary>
-        public string BuildSql(string rawSql) => rawSql.Replace("**removethis** ", string.Empty);
+        [Join("INNER JOIN [SampleTable2] ON [SampleTable].[Id] = [SampleTable2].[SampleId]")]
+		public bool WithTable2Join { get; set; }
+
+        [NullWhen(0)]
+        [Parameter]
+        [Join("INNER JOIN [SampleTable3] ON [SampleTable].[Id] = [SampleTable3].[SampleId] AND [SampleTable3]=@joinWithParam")] 
+		public int JoinWithParam { get; set; }
+
+		/// <summary>
+		/// not a practical example, but demonstrates how query can be "self-modified" when run
+		/// </summary>
+		public string BuildSql(string rawSql) => rawSql.Replace("**removethis** ", string.Empty);
         
         public IEnumerable<ITestableQuery> GetTestCases()
         {

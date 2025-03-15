@@ -218,16 +218,21 @@ namespace Dapper.QX
 
 			bool IncludeJoin(PropertyInfo pi)
 			{
-				if (pi.GetValue(parameters)?.Equals(true) ?? false) return true;
+				var propertyVal = pi.GetValue(parameters);
+
+				if (propertyVal?.Equals(true) ?? false) return true;
 
 				if (pi.HasAttribute<TableType>())
 				{
-					return (pi.GetValue(parameters) is DataTable data);
+					return (propertyVal is DataTable data);
 				}
-
-				if (pi.GetValue(parameters) != null) return true;
-
-				return false;
+								
+				if (propertyVal != null && pi.HasAttribute<NullWhenAttribute>(out var attr))
+				{
+					if (attr.NullValues?.Contains(propertyVal) ?? false) return false;
+				}					
+													
+				return propertyVal != null;
 			}
 		}
 
