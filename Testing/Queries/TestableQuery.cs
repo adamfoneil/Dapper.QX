@@ -1,14 +1,16 @@
 ﻿using Dapper.QX.Abstract;
 using Dapper.QX.Attributes;
 using Dapper.QX.Interfaces;
+using SqlIntegration.Library.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Data;
 
 namespace Testing.Queries
 {
     public class TestableQuerySample : TestableQuery<int>
     {
-        public TestableQuerySample() : base("SELECT {top} [FirstName], [Weight], [SomeDate], [Notes], [Id] FROM [SampleTable] {where} ORDER BY [FirstName] {offset}")
+        public TestableQuerySample() : base("SELECT {top} [FirstName], [Weight], [SomeDate], [Notes], [SampleTable].[Id] FROM [SampleTable] {join} {where} ORDER BY [FirstName] {offset}")
         {
         }
 
@@ -32,6 +34,10 @@ namespace Testing.Queries
 
         [Phrase(new string[] { nameof(TypicalQueryResult.Notes) })]
         public string NotesContain { get; set; }
+
+        [TableType("dbo.IdList")]
+        [Join("INNER JOIN @joinIds AS [j] ON [SampleTable].[Id] = [j].[Id]")]
+		public DataTable JoinIds { get; set; }
         
         /*
          * used only to see if new Debug output appeared
@@ -51,7 +57,8 @@ namespace Testing.Queries
             yield return new TestableQuerySample() { MaxDate = new DateTime(2019, 1, 1) };
             yield return new TestableQuerySample() { NotesContain = "this that -whatever" };
             yield return new TestableQuerySample() { PageNumber = 3 };
-            //yield return new TestableQuerySample() { BrokenParam = "whatever" };
-        }
+			yield return new TestableQuerySample() { JoinIds = new int[] { 1, 2, 3 }.ToDataTable() };
+			//yield return new TestableQuerySample() { BrokenParam = "whatever" };
+		}
     }
 }

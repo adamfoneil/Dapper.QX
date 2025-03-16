@@ -74,22 +74,21 @@ namespace Testing
             return string.Join(" ", words);
         }
 
-        private static IEnumerable<InitializeStatement> SampleObjects()
-        {
-            return new InitializeStatement[]
-            {
-                new InitializeStatement(
-                    "dbo.SampleTable", "DROP TABLE %obj%", @"CREATE TABLE %obj% (
+        private static IEnumerable<InitializeStatement> SampleObjects() => new InitializeStatement[]
+			{
+				new(
+					"dbo.SampleTable", "DROP TABLE %obj%", @"CREATE TABLE %obj% (
                         [FirstName] nvarchar(50) NOT NULL,
                         [Weight] decimal(5,2) NOT NULL,
                         [SomeDate] datetime NOT NULL,
                         [Notes] nvarchar(max) NULL,
                         [Id] int identity(1,1) PRIMARY KEY
-                    )")
-            };
-        }
+                    )"),
+				new("dbo.IdList", "DROP TYPE %obj%", @"CREATE TYPE %obj% AS TABLE ([Id] int NOT NULL PRIMARY KEY)"),
+			};
 
-        [TestMethod]
+
+		[TestMethod]
         public void TypicalQuery()
         {
             QueryHelper.Test<TypicalQuery>(() => LocalDb.GetConnection(dbName));
@@ -246,21 +245,20 @@ namespace Testing
         {
             var qry = new SimpleTvpExample() { Source = new int[] { 1, 2, 3 }.ToDataTable() };
 
-            using (var cn = LocalDb.GetConnection(dbName))
-            {
-                try
-                {
-                    cn.Execute("CREATE TYPE [IdList] AS TABLE ([Id] int NOT NULL PRIMARY KEY)");
-                }
-                catch 
-                {
-                    // do nothing                    
-                }
+			using var cn = LocalDb.GetConnection(dbName);
 
-                var results = qry.Execute(cn);
-                Assert.IsTrue(results.SequenceEqual(new int[] { 1, 2, 3 }));
-            }
-        }
+			try
+			{
+				cn.Execute("CREATE TYPE [IdList] AS TABLE ([Id] int NOT NULL PRIMARY KEY)");
+			}
+			catch
+			{
+				// do nothing                    
+			}
+
+			var results = qry.Execute(cn);
+			Assert.IsTrue(results.SequenceEqual(new int[] { 1, 2, 3 }));
+		}
 
         [TestMethod]
         public void MoreComplexTvp()
