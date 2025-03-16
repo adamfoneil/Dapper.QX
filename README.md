@@ -26,15 +26,13 @@ public class MyQuery : Query<MyResultClass>
 ```
 Run your query like this:
 ```csharp
-using (var cn = GetConnection())
+using var cn = GetConnection();
+var data = await new MyQuery() 
 {
-    var data = await new MyQuery() 
-    {
-        MinDate = DateTime.Now, 
-        MaxDate = DateTime.Now.AddDays(30),
-        AssignedTo = "somebody"
-    }.ExecuteAsync(cn);
-}
+    MinDate = DateTime.Now, 
+    MaxDate = DateTime.Now.AddDays(30),
+    AssignedTo = "somebody"
+}.ExecuteAsync(cn);
 ```
 In the example above `GetConnection` is a fictional method -- you will need to provide your own method that returns an `IDbConnection` that works in your project. Read on below for an alternate syntax that lets you omit the `using` block.
 
