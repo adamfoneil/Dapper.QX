@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>1.1.5</Version>
+		<Version>1.1.6</Version>
 		<Authors>Adam O'Neil</Authors>
 		<Product>Dapper.QX</Product>
 		<Description>More powerful and testable inline SQL used with Dapper</Description>
