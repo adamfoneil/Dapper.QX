@@ -128,7 +128,7 @@ namespace Dapper.QX
 			}
 #endif
 
-			using (var scope = logger?.BeginScope("Request Id {id}", Activity.Current?.Id ?? Guid.NewGuid().ToString()))
+			using (var scope = logger?.BeginScope("Request Id {TraceId}", Activity.Current?.Id ?? Guid.NewGuid().ToString()))
 			{
                 try
                 {
