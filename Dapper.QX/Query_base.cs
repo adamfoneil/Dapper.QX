@@ -131,7 +131,7 @@ namespace Dapper.QX
             var paramValues = GetParameterValues(queryParams);
             var paramValueStr = string.Join(", ", paramValues.Select(kp => $"{kp.Key}={kp.Value}"));
 
-            using (var scope = logger?.BeginScope("Trace Id {TraceId}", Activity.Current?.Id ?? Guid.NewGuid().ToString()))
+            using (var scope = logger?.BeginScope("Trace Id {TraceId}, query {query}", Activity.Current?.Id ?? Guid.NewGuid().ToString(), GetType().Name))
 			{
                 try
                 {
