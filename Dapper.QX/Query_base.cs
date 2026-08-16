@@ -128,14 +128,15 @@ namespace Dapper.QX
 			}
 #endif
 
-			using (var scope = logger?.BeginScope("Request Id {TraceId}", Activity.Current?.Id ?? Guid.NewGuid().ToString()))
+            var paramValues = GetParameterValues(queryParams);
+            var paramValueStr = string.Join(", ", paramValues.Select(kp => $"{kp.Key}={kp.Value}"));
+
+            using (var scope = logger?.BeginScope("Trace Id {TraceId}", Activity.Current?.Id ?? Guid.NewGuid().ToString()))
 			{
                 try
                 {
                     Debug.Print(DebugSql);
-
                     var stopwatch = Stopwatch.StartNew();
-                    var paramValues = GetParameterValues(queryParams);
 
 #if NETSTANDARD2_0
                     await OnExecutingAsync(connection, queryParams);
@@ -143,15 +144,14 @@ namespace Dapper.QX
                     var result = await dapperMethod.Invoke(ResolvedSql, queryParams);
                     stopwatch.Stop();
 
-                    logger?.LogDebug("{sql} {elapsed}ms with params {@params}", DebugSql, stopwatch.ElapsedMilliseconds, paramValues);
+                    logger?.LogDebug("{sql} {elapsed}ms with params {params}", DebugSql, stopwatch.ElapsedMilliseconds, paramValueStr);
 
                     return result;
                 }
                 catch (Exception exc)
-                {
-                    var paramValues = GetParameterValues(queryParams);
+                {                    
                     var qryExc = new QueryException(exc, ResolvedSql, DebugSql, queryParams, GetType());
-                    logger?.LogError(exc, "Error in {queryClass} with params {@params}", this.GetType().Name, paramValues);
+                    logger?.LogError(exc, "Error in {queryClass} with params {params}", this.GetType().Name, paramValueStr);
                     throw qryExc;
                 }
             }
