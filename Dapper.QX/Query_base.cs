@@ -108,31 +108,35 @@ namespace Dapper.QX
 			}
 #endif
 
-			try
+			using (var scope = logger?.BeginScope("Request Id {id}", Activity.Current?.Id ?? Guid.NewGuid().ToString()))
 			{
-				Debug.Print(DebugSql);
-				logger?.LogDebug(DebugSql);
+                try
+                {
+                    Debug.Print(DebugSql);
 
-				var stopwatch = Stopwatch.StartNew();
+                    var stopwatch = Stopwatch.StartNew();
 
 #if NETSTANDARD2_0
-				await OnExecutingAsync(connection, queryParams);
+                    await OnExecutingAsync(connection, queryParams);
 #endif
-				var result = await dapperMethod.Invoke(ResolvedSql, queryParams);
-				stopwatch.Stop();
+                    var result = await dapperMethod.Invoke(ResolvedSql, queryParams);
+                    stopwatch.Stop();
 
-				return result;
-			}
-			catch (Exception exc)
-			{
-				var qryExc = new QueryException(exc, ResolvedSql, DebugSql, queryParams, GetType());
-				logger?.LogError(exc, "Error in {queryClass} with {@queryParams}: " + exc.Message, this.GetType().Name, queryParams);
-				throw qryExc;
-			}
-		}
+                    logger?.LogDebug("{sql} {elapsed}ms", DebugSql, stopwatch.ElapsedMilliseconds);
+
+                    return result;
+                }
+                catch (Exception exc)
+                {
+                    var qryExc = new QueryException(exc, ResolvedSql, DebugSql, queryParams, GetType());
+                    logger?.LogError(exc, "Error in {queryClass} with {@queryParams}", this.GetType().Name, queryParams);
+                    throw qryExc;
+                }
+            }
+        }
 
 #if NETSTANDARD2_0
-		protected virtual async Task<(Dictionary<string, string> inserts, DynamicParameters parameters)> ResolveMacrosAsync(IDbConnection connection, IEnumerable<string> macros) => await Task.FromResult((macros.ToDictionary(m => m, m => string.Empty), new DynamicParameters()));
+        protected virtual async Task<(Dictionary<string, string> inserts, DynamicParameters parameters)> ResolveMacrosAsync(IDbConnection connection, IEnumerable<string> macros) => await Task.FromResult((macros.ToDictionary(m => m, m => string.Empty), new DynamicParameters()));
 
 		protected virtual async Task OnExecutingAsync(IDbConnection connection, DynamicParameters parameters) => await Task.CompletedTask;
 #endif
