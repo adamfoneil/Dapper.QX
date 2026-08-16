@@ -85,6 +85,26 @@ namespace Dapper.QX
 			return result.Single;
 		}
 
+		private static Dictionary<string, object> GetParameterValues(DynamicParameters parameters)
+		{
+			var result = new Dictionary<string, object>();
+			if (parameters == null) return result;
+			
+			foreach (var paramName in parameters.ParameterNames)
+			{
+				try
+				{
+					result[paramName] = parameters.Get<dynamic>(paramName);
+				}
+				catch
+				{
+					result[paramName] = "<unable to retrieve>";
+				}
+			}
+			
+			return result;
+		}
+
 		private async Task<DapperResult<T>> ExecuteInnerAsync<T>(IDbConnection connection, Func<string, object, Task<DapperResult<T>>> dapperMethod, ILogger logger = null, Action<DynamicParameters> setParams = null, int newPageSize = 0)
 		{
 			ResolveSql(out DynamicParameters queryParams, setParams, newPageSize);
@@ -115,6 +135,7 @@ namespace Dapper.QX
                     Debug.Print(DebugSql);
 
                     var stopwatch = Stopwatch.StartNew();
+                    var paramValues = GetParameterValues(queryParams);
 
 #if NETSTANDARD2_0
                     await OnExecutingAsync(connection, queryParams);
@@ -122,14 +143,15 @@ namespace Dapper.QX
                     var result = await dapperMethod.Invoke(ResolvedSql, queryParams);
                     stopwatch.Stop();
 
-                    logger?.LogDebug("{sql} {elapsed}ms", DebugSql, stopwatch.ElapsedMilliseconds);
+                    logger?.LogDebug("{sql} {elapsed}ms with params {@params}", DebugSql, stopwatch.ElapsedMilliseconds, paramValues);
 
                     return result;
                 }
                 catch (Exception exc)
                 {
+                    var paramValues = GetParameterValues(queryParams);
                     var qryExc = new QueryException(exc, ResolvedSql, DebugSql, queryParams, GetType());
-                    logger?.LogError(exc, "Error in {queryClass} with {@queryParams}", this.GetType().Name, queryParams);
+                    logger?.LogError(exc, "Error in {queryClass} with params {@params}", this.GetType().Name, paramValues);
                     throw qryExc;
                 }
             }
